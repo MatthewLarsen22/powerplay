@@ -20,6 +20,11 @@ func init() {
 				return tx.Migrator().DropTable("penalty_types")
 			},
 		},
+		&gormigrate.Migration{
+			ID:       "create_channel_table",
+			Migrate:  func(tx *gorm.DB) error { return tx.AutoMigrate(&models.Channel{}) },
+			Rollback: func(tx *gorm.DB) error { return tx.Migrator().DropTable("channel") },
+		},
 		// Add more migrations here
 	)
 }
