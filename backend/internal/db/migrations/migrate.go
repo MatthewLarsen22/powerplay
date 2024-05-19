@@ -34,6 +34,7 @@ func Run(db *gorm.DB) error {
 			&models.Registration{},
 			&models.Venue{},
 			&models.KeyRecord{},
+			&models.Message{},
 		)
 		if err != nil {
 			return err
