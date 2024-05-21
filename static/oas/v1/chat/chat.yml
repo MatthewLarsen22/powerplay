@@ -1,0 +1,48 @@
+paths:
+  chat:
+    post:
+      tags:
+        - Chat
+      summary: Create a new chat channel 
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        description:  The request body must contain the name and memebers of the new channel. It may also include an image string and a description. 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/schemas/CreateChannelRequest"
+      responses:
+        200:
+          description: Channel created
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/CreateChannelResponse'
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  
+schemas:
+  CreateChannelRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the new channel
+        example: Substitute Skaters
+      MemberIds:
+        type: []string
+        description: User IDs of channel participants
+        example: ["UserA", "UserB", "UserC"]
+
+  CreateChannelResponse:
+    type: object
+    properties:
+      status_code:
+        $ref: "../common/schemas.yml#/schemas/StatusCode200"
+      status_string:
+        $ref: "../common/schemas.yml#/schemas/StatusString200"
+      request_id:
+        $ref: "../common/schemas.yml#/schemas/RequestId"
