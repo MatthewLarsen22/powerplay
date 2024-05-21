@@ -33,9 +33,9 @@ schemas:
         description: The name of the new channel
         example: Substitute Skaters
       MemberIds:
-        type: []string
+        type: string
         description: User IDs of channel participants
-        example: ["UserA", "UserB", "UserC"]
+        example: UserA
 
   CreateChannelResponse:
     type: object
@@ -46,3 +46,13 @@ schemas:
         $ref: "../common/schemas.yml#/schemas/StatusString200"
       request_id:
         $ref: "../common/schemas.yml#/schemas/RequestId"
+      response_data:
+        type: object
+        properties:
+          jwt:
+            type: string
+            description: not nothing
+            example: actually nothing
+          expiration:
+            type: string
+            format: date-time
