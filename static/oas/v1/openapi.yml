@@ -10,8 +10,8 @@ info:
 paths:
   /auth:
     $ref: "./auth/auth.yml#/paths/auth"
-  /chat:
-    $ref: "./chat/chat.yml#/paths/chat"
+  /chat/channels/create:
+    $ref: "./chat/channels.yml#/paths/channels"
 
 components:
   securitySchemes:

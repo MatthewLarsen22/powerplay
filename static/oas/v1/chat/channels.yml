@@ -1,14 +1,14 @@
 paths:
-  chat:
+  channels:
     post:
       tags:
-        - Chat
+        - "Chat: Channels"
       summary: Create a new chat channel 
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       requestBody:
-        description:  The request body must contain the name and memebers of the new channel. It may also include an image string and a description. 
+        description:  The request body must contain a name for the new channel and a list of member ids representing the individuals who will participate in the channel. Optionally, the request may also include an image string and/or a description of the channel. 
         required: true
         content:
           application/json:
@@ -16,7 +16,7 @@ paths:
               $ref: "#/schemas/CreateChannelRequest"
       responses:
         200:
-          description: Channel created
+          description: Created channel
           content:
             application/json:
               schema:
@@ -32,10 +32,18 @@ schemas:
         type: string
         description: The name of the new channel
         example: Substitute Skaters
-      MemberIds:
-        type: string
+      memberIds:
+        type: string list
         description: User IDs of channel participants
-        example: UserA
+        example: [UserA, UserB, UserC]
+      imageString:
+        type: string
+        description: (optional) string svg image to will represent the channel
+        example: <text x="10" y="10">Hello World!</text>
+      description:
+        type: string
+        description: (optional) description of the channel
+        example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
 
   CreateChannelResponse:
     type: object
@@ -48,11 +56,4 @@ schemas:
         $ref: "../common/schemas.yml#/schemas/RequestId"
       response_data:
         type: object
-        properties:
-          jwt:
-            type: string
-            description: not nothing
-            example: actually nothing
-          expiration:
-            type: string
-            format: date-time
+        properties: {}
