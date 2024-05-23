@@ -17,6 +17,7 @@ func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
 	apis.RegisterHandler(fiber.MethodPost, "/chat/channels/create", auth.Public, createChannel)
 	apis.RegisterHandler(fiber.MethodDelete, "/chat/channels/delete", auth.Public, deleteChannel)
+	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/updateimage", auth.Public, updateImage)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
 }
@@ -74,6 +75,41 @@ func deleteChannel(c *fiber.Ctx) error {
 
 	delete(channels, channelID.Value) // TODO: delete the channel from the DB
 	log.Info("Deleted channel " + channelID.Value)
+	return responder.Ok(c)
+}
+
+func updateImage(c *fiber.Ctx) error {
+	updateData := new(ChannelUpdate)
+
+	// Load the request body as a ChannelUpdate object. If any of the provided values are the wrong type, the request is bad.
+	if err := c.BodyParser(updateData); err != nil {
+		return responder.BadRequest(c)
+	}
+
+	// Verify that values were provided for required fields and verify the existence of the channel. If any required values are missing or the channel doesn't exist, the request is bad.
+	var errorMsg string
+	var channel ChannelConfiguration
+	var channelOk bool
+	if updateData.ChannelID == "" {
+		errorMsg += "\t'channel_id' is a required field.\n"
+	} else {
+		// Retrieve the channel specified in the channel_id field.
+		channel, channelOk = channels[updateData.ChannelID] // TODO: retrieve the channel from the DB.
+		if !channelOk {
+			errorMsg += "\tNo channel exists with ID " + updateData.ChannelID + ".\n"
+		}
+	}
+	if updateData.Value == "" {
+		errorMsg += "\t'value' is a required field.\n"
+	}
+	if errorMsg != "" {
+		log.Info("Channel image could not be updated. Reason(s):\n" + errorMsg)
+		return responder.BadRequest(c)
+	}
+
+	channel.ImageString = updateData.Value // TODO: update the member_ids list in the database
+	channels[updateData.ChannelID] = channel
+	log.Info("Channel " + updateData.ChannelID + " image updated")
 	return responder.Ok(c)
 }
 

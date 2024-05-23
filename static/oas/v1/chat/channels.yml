@@ -47,6 +47,30 @@ paths:
                 $ref: '#/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
+  updateChannelImage:
+    put:
+      tags:
+        - "Chat: Channels"
+      summary: Update the image for a chat channel 
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a channel ID and an image string value.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/schemas/UpdateChannelImageRequest"
+      responses:
+        200:
+          description: Updated image
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/EmptySuccessResponse'
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
   addUser:
     put:
       tags:
@@ -110,7 +134,7 @@ schemas:
         example: [UserA, UserB, UserC]
       image_string:
         type: string
-        description: (optional) string svg image to will represent the channel
+        description: (optional) string svg image to represent the channel
         example: <text x="10" y="10">Hello World!</text>
       description:
         type: string
@@ -124,6 +148,18 @@ schemas:
         type: string
         description: The ID of the target channel
         example: "0"
+
+  UpdateChannelImageRequest:
+    type: object
+    properties:
+      channel_id:
+        type: string
+        description: The ID of the target channel
+        example: "0"
+      value:
+        type: string
+        description: An image string to represent the channel
+        example: <text x="10" y="10">Hello World!</text>
 
   AddOrRemoveUserFromChannelRequest:
     type: object
