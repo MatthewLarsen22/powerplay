@@ -11,7 +11,9 @@ paths:
   /auth:
     $ref: "./auth/auth.yml#/paths/auth"
   /chat/channels/create:
-    $ref: "./chat/channels.yml#/paths/channels"
+    $ref: "./chat/channels.yml#/paths/createChannel"
+  /chat/channels/adduser:
+    $ref: "./chat/channels.yml#/paths/addUser"
 
 components:
   securitySchemes:

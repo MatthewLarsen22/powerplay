@@ -1,5 +1,5 @@
 paths:
-  channels:
+  createChannel:
     post:
       tags:
         - "Chat: Channels"
@@ -8,7 +8,7 @@ paths:
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       requestBody:
-        description:  The request body must contain a name for the new channel and a list of member ids representing the individuals who will participate in the channel. Optionally, the request may also include an image string and/or a description of the channel. 
+        description: The request body must contain a name for the new channel and a list of member ids representing the individuals who will participate in the channel. Optionally, the request may also include an image string and/or a description of the channel. 
         required: true
         content:
           application/json:
@@ -20,7 +20,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/schemas/CreateChannelResponse'
+                $ref: '#/schemas/EmptySuccessResponse'
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  addUser:
+    put:
+      tags:
+        - "Chat - Channels"
+      summary: Add a user to an existing channel
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a channel ID and a user ID value.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/schemas/AddUserToChannelRequest"
+      responses:
+        200:
+          description: Added user to channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
   
@@ -45,7 +69,19 @@ schemas:
         description: (optional) description of the channel
         example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
 
-  CreateChannelResponse:
+  AddUserToChannelRequest:
+    type: object
+    properties:
+      channel_id:
+        type: string
+        description: The ID of the target channel
+        example: "0"
+      value:
+        type: string
+        description: The ID of the user to be added to the channel
+        example: "0"
+
+  EmptySuccessResponse:
     type: object
     properties:
       status_code:
