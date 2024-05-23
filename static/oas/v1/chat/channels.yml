@@ -32,11 +32,11 @@ schemas:
         type: string
         description: The name of the new channel
         example: Substitute Skaters
-      memberIds:
+      member_ids:
         type: string list
         description: User IDs of channel participants
         example: [UserA, UserB, UserC]
-      imageString:
+      image_string:
         type: string
         description: (optional) string svg image to will represent the channel
         example: <text x="10" y="10">Hello World!</text>
@@ -54,6 +54,3 @@ schemas:
         $ref: "../common/schemas.yml#/schemas/StatusString200"
       request_id:
         $ref: "../common/schemas.yml#/schemas/RequestId"
-      response_data:
-        type: object
-        properties: {}
