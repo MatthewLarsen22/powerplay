@@ -50,7 +50,7 @@ paths:
   addUser:
     put:
       tags:
-        - "Chat - Channels"
+        - "Chat: Channels"
       summary: Add a user to a channel
       description: |
         **REQUIRED PERMISSIONS:** TBD
@@ -74,7 +74,7 @@ paths:
   removeUser:
     put:
       tags:
-        - "Chat - Channels"
+        - "Chat: Channels"
       summary: Remove a user from a channel
       description: |
         **REQUIRED PERMISSIONS:** TBD
