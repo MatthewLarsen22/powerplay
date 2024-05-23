@@ -27,7 +27,7 @@ paths:
     put:
       tags:
         - "Chat - Channels"
-      summary: Add a user to an existing channel
+      summary: Add a user to a channel
       description: |
         **REQUIRED PERMISSIONS:** TBD
         **RATE LIMIT:** TBD
@@ -37,7 +37,31 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/schemas/AddUserToChannelRequest"
+              $ref: "#/schemas/AddOrRemoveUserFromChannelRequest"
+      responses:
+        200:
+          description: Added user to channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/EmptySuccessResponse'
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  removeUser:
+    put:
+      tags:
+        - "Chat - Channels"
+      summary: Remove a user from a channel
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a channel ID and a user ID value.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/schemas/AddOrRemoveUserFromChannelRequest"
       responses:
         200:
           description: Added user to channel
@@ -69,7 +93,7 @@ schemas:
         description: (optional) description of the channel
         example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
 
-  AddUserToChannelRequest:
+  AddOrRemoveUserFromChannelRequest:
     type: object
     properties:
       channel_id:
@@ -78,7 +102,7 @@ schemas:
         example: "0"
       value:
         type: string
-        description: The ID of the user to be added to the channel
+        description: The ID of the target user
         example: "0"
 
   EmptySuccessResponse:
