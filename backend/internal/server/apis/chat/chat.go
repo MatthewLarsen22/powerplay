@@ -10,13 +10,14 @@ import (
 	"github.com/jak103/powerplay/internal/utils/responder"
 )
 
-var nextID int = 0
+var nextID = 0
 var channels = make(map[string]ChannelConfiguration)
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
 	apis.RegisterHandler(fiber.MethodPost, "/chat/channels/create", auth.Public, createChannel)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/adduser", auth.Public, addUser)
+	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
 }
 
 func helloWorld(c *fiber.Ctx) error {
@@ -83,7 +84,62 @@ func addUser(c *fiber.Ctx) error {
 	}
 
 	channel.MemberIDs = append(channel.MemberIDs, updateData.Value) // TODO: update the member_ids list in the database
+	channels[updateData.ChannelID] = channel
 	log.Info("User " + updateData.Value + " added to channel " + updateData.ChannelID)
+	return responder.Ok(c)
+}
+
+func removeUser(c *fiber.Ctx) error {
+	updateData := new(ChannelUpdate)
+
+	// Load the request body as a ChannelUpdate object. If any of the provided values are the wrong type, the request is bad.
+	if err := c.BodyParser(updateData); err != nil {
+		return responder.BadRequest(c)
+	}
+
+	// Verify that values were provided for required fields and verify the existence of the channel. If any required values are missing or the channel doesn't exist, the request is bad.
+	var errorMsg string
+	var channel ChannelConfiguration
+	var channelOk bool
+	var userIndex = -1
+	if updateData.ChannelID == "" {
+		errorMsg += "\t'channel_id' is a required field.\n"
+	} else {
+		// Retrieve the channel specified in the channel_id field.
+		channel, channelOk = channels[updateData.ChannelID] // TODO: retrieve the channel from the DB.
+		if !channelOk {
+			errorMsg += "\tNo channel exists with ID " + updateData.ChannelID + ".\n"
+		}
+	}
+	if updateData.Value == "" {
+		errorMsg += "\t'value' is a required field.\n"
+	} else {
+		if channelOk {
+			for i, v := range channel.MemberIDs {
+				if v == updateData.Value {
+					userIndex = i
+					break
+				}
+			}
+
+			if userIndex < 0 {
+				errorMsg += "\tUser " + updateData.Value + " is not a participant in channel " + updateData.ChannelID + ".\n"
+			}
+		}
+	}
+	if errorMsg != "" {
+		log.Info("The user could not be removed from the channel. Reason(s):\n" + errorMsg)
+		return responder.BadRequest(c)
+	}
+
+	// TODO: update the member_ids list in the database
+	if len(channel.MemberIDs) > 1 {
+		channel.MemberIDs = append(channel.MemberIDs[:userIndex], channel.MemberIDs[userIndex+1:]...)
+	} else {
+		channel.MemberIDs = make([]string, 0)
+	}
+	channels[updateData.ChannelID] = channel
+	log.Info("User " + updateData.Value + " removed from channel " + updateData.ChannelID)
 	return responder.Ok(c)
 }
 
