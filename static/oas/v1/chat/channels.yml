@@ -23,6 +23,30 @@ paths:
                 $ref: '#/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
+  deleteChannel:
+    delete:
+      tags:
+        - "Chat: Channels"
+      summary: Delete a chat channel 
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain the channel ID.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/schemas/DeleteChannelRequest"
+      responses:
+        200:
+          description: Deleted channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/EmptySuccessResponse'
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
   addUser:
     put:
       tags:
@@ -92,6 +116,14 @@ schemas:
         type: string
         description: (optional) description of the channel
         example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
+  
+  DeleteChannelRequest:
+    type: object
+    properties:
+      channel_id:
+        type: string
+        description: The ID of the target channel
+        example: "0"
 
   AddOrRemoveUserFromChannelRequest:
     type: object

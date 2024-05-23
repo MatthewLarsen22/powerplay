@@ -12,6 +12,8 @@ paths:
     $ref: "./auth/auth.yml#/paths/auth"
   /chat/channels/create:
     $ref: "./chat/channels.yml#/paths/createChannel"
+  /chat/channels/delete:
+    $ref: "./chat/channels.yml#/paths/deleteChannel"
   /chat/channels/adduser:
     $ref: "./chat/channels.yml#/paths/addUser"
   /chat/channels/removeuser:

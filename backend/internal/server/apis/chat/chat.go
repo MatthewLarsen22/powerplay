@@ -16,6 +16,7 @@ var channels = make(map[string]ChannelConfiguration)
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
 	apis.RegisterHandler(fiber.MethodPost, "/chat/channels/create", auth.Public, createChannel)
+	apis.RegisterHandler(fiber.MethodDelete, "/chat/channels/delete", auth.Public, deleteChannel)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
 }
@@ -49,6 +50,30 @@ func createChannel(c *fiber.Ctx) error {
 	channels[strconv.Itoa(nextID)] = *channel // TODO: store channels in the DB instead of just in a dictionary.
 	nextID += 1
 	log.Info("Channel created: " + channel.Name)
+	return responder.Ok(c)
+}
+
+func deleteChannel(c *fiber.Ctx) error {
+	channelID := new(ChannelID)
+
+	// Load the request body as a channelID string. If the provided value is the wrong type, the request is bad.
+	if err := c.BodyParser(channelID); err != nil {
+		return responder.BadRequest(c)
+	}
+
+	// Verify the existence of the channel. If the channel doesn't exist, the request is bad.
+	var errorMsg string
+	_, channelExists := channels[channelID.Value] // TODO: retrieve the channel from the DB
+	if !channelExists {
+		errorMsg += "\tChannel " + channelID.Value + " does not exist.\n"
+	}
+	if errorMsg != "" {
+		log.Info("The channel could not be deleted. Reason(s):\n" + errorMsg)
+		return responder.BadRequest(c)
+	}
+
+	delete(channels, channelID.Value) // TODO: delete the channel from the DB
+	log.Info("Deleted channel " + channelID.Value)
 	return responder.Ok(c)
 }
 
@@ -141,6 +166,10 @@ func removeUser(c *fiber.Ctx) error {
 	channels[updateData.ChannelID] = channel
 	log.Info("User " + updateData.Value + " removed from channel " + updateData.ChannelID)
 	return responder.Ok(c)
+}
+
+type ChannelID struct {
+	Value string `json:"channel_id"`
 }
 
 type ChannelUpdate struct {
