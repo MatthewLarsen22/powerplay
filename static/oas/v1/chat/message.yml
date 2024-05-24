@@ -94,7 +94,7 @@ schemas:
           recipientIDs:
             type: array
             description: User IDs of message recipients
-            example: [0, 0, 0]
+            example: [1, 2, 3]
   CreateMessageRequest:
     type: object
     properties:
@@ -113,7 +113,7 @@ schemas:
       recipientIDs:
         description: User IDs of message recipients
         type: array
-        example: [0, 0, 0]
+        example: [1, 2, 3]
   CreateMessageResponse:
     type: object
     properties:
