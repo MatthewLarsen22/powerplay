@@ -10,6 +10,7 @@ info:
 paths:
   /auth:
     $ref: "./auth/auth.yml#/paths/auth"
+    $ref: "./message/message.yml#/paths/message"
 
 components:
   securitySchemes:
