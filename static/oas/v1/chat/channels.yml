@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmptySuccessResponse'
+                $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
   deleteChannel:
@@ -44,7 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmptySuccessResponse'
+                $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
   updateChannelImage:
@@ -68,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmptySuccessResponse'
+                $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
   addUser:
@@ -165,29 +165,18 @@ components:
           description: The ID of the target channel
           example: "0"
 
-  UpdateChannelImageRequest:
-    type: object
-    properties:
-      channel_id:
-        type: string
-        description: The ID of the target channel
-        example: "0"
-      value:
-        type: string
-        description: An image string to represent the channel
-        example: <text x="10" y="10">Hello World!</text>
+    UpdateChannelImageRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+        value:
+          type: string
+          description: An image string to represent the channel
+          example: <text x="10" y="10">Hello World!</text>
 
-  AddOrRemoveUserFromChannelRequest:
-    type: object
-    properties:
-      channel_id:
-        type: string
-        description: The ID of the target channel
-        example: "0"
-      value:
-        type: string
-        description: The ID of the target user
-        example: "0"
     AddOrRemoveUserFromChannelRequest:
       type: object
       properties:
@@ -199,6 +188,17 @@ components:
           type: string
           description: The ID of the target user
           example: "0"
+      AddOrRemoveUserFromChannelRequest:
+        type: object
+        properties:
+          channel_id:
+            type: string
+            description: The ID of the target channel
+            example: "0"
+          value:
+            type: string
+            description: The ID of the target user
+            example: "0"
 
     EmptySuccessResponse:
       type: object
