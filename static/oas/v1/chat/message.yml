@@ -2,9 +2,11 @@ paths:
   message:
     get:
       summary: Get single message
-      description: Gets single message content and information
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
       tags:
-        - Message
+        - 'Chat: Message'
       operation-id: get-message
       requestBody:
         required: true
@@ -18,14 +20,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/schemas/MessageGetResponse'
+                $ref: '#/schemas/GetMessageResponse'
         400:
           $ref: "./common/errors.yml#/responses/BadRequest"
     post:
       summary: Creates a single message
-      description: Creates a single message object
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
       tags:
-        - message
+        - 'Chat: Message'
       operation-id: post-message
       requestBody:
         required: true
@@ -39,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/schemas/MessageCreationResponse' 
+                $ref: '#/schemas/CreateMessageResponse' 
         400:
           $ref: "./common/errors.yml#/responses/BadRequest"
 
@@ -51,32 +55,46 @@ schemas:
         type: integer
         description: Message ID of requested message
         example: 0
-  MessageGetResponse:
+  GetMessageResponse:
     type: object
     properties:
-      messageID:
-        type: integer
-        description: Message ID of requested message
-        example: 0
-      senderID:
-        type: integer
-        description: User ID of sender
-        example: 0
-      content:
+      message:
         type: string
-        description: Message content
-        example: 'Comms check, testing'
-      createdAt:
-        type: time.time
-        description: Time when message was sent
-        example: # TODO
-      channelID:
-        type: integer
-        description: Channel ID where message was posted
-        example: 0
-      recipientIDs:
-        description: User IDs of message recipients
-        type: array
+        description: Log-message for sent chat-message
+        example: Message sent successfully
+      status_code:
+        $ref: "../common/schemas.yml#/schemas/StatusCode200"
+      status_string:
+        $ref: "../common/schemas.yml#/schemas/StatusString200"
+      request_id:
+        $ref: "../common/schemas.yml#/schemas/RequestId"
+      response_data:
+        type: object
+        properties:
+          messageID:
+            type: integer
+            description: Message ID of requested message
+            example: 0
+          senderID:
+            type: integer
+            description: User ID of sender
+            example: 0
+          content:
+            type: string
+            description: Message content
+            example: 'Comms check, testing'
+          createdAt:
+            type: string
+            description: Time when message was sent
+            example: 'some time'
+          channelID:
+            type: integer
+            description: Channel ID where message was posted
+            example: 0
+          recipientIDs:
+            type: array
+            description: User IDs of message recipients
+            example: [0, 0, 0]
   CreateMessageRequest:
     type: object
     properties:
@@ -88,10 +106,6 @@ schemas:
         type: string
         description: Message content
         example: 'Comms check, testing'
-      createdAt:
-        type: time.time
-        description: Time when message was sent
-        example: # TODO
       channelID:
         type: integer
         description: Channel ID where message was posted
@@ -99,11 +113,13 @@ schemas:
       recipientIDs:
         description: User IDs of message recipients
         type: array
-  MessageCreationResponse:
+        example: [0, 0, 0]
+  CreateMessageResponse:
     type: object
     properties:
       message:
         type: string
+        description: Log-message for sent chat-message
         example: Message sent successfully
       status_code:
         $ref: "../common/schemas.yml#/schemas/StatusCode200"
