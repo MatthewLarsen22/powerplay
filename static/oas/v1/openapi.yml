@@ -20,6 +20,8 @@ paths:
     $ref: "./chat/channels.yml#/paths/removeUser"
   /chat/channels/updateimage:
     $ref: "./chat/channels.yml#/paths/updateChannelImage"
+  /chat/channels/updatedescription:
+    $ref: "./chat/channels.yml#/paths/updateChannelDescription"
   /chat/channels/rename:
     $ref: "./chat/channels.yml#/paths/rename"
 
