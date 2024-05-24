@@ -13,14 +13,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/schemas/CreateChannelRequest"
+              $ref: "#/components/schemas/CreateChannelRequest"
       responses:
         200:
           description: Created channel
           content:
             application/json:
               schema:
-                $ref: '#/schemas/EmptySuccessResponse'
+                $ref: '#/components/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
   deleteChannel:
@@ -37,14 +37,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/schemas/DeleteChannelRequest"
+              $ref: "#/components/schemas/DeleteChannelRequest"
       responses:
         200:
           description: Deleted channel
           content:
             application/json:
               schema:
-                $ref: '#/schemas/EmptySuccessResponse'
+                $ref: '#/components/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
   addUser:
@@ -61,14 +61,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/schemas/AddOrRemoveUserFromChannelRequest"
+              $ref: "#/components/schemas/AddOrRemoveUserFromChannelRequest"
       responses:
         200:
           description: Added user to channel
           content:
             application/json:
               schema:
-                $ref: '#/schemas/EmptySuccessResponse'
+                $ref: '#/components/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
   removeUser:
@@ -85,64 +85,92 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/schemas/AddOrRemoveUserFromChannelRequest"
+              $ref: "#/components/schemas/AddOrRemoveUserFromChannelRequest"
       responses:
         200:
           description: Added user to channel
           content:
             application/json:
               schema:
-                $ref: '#/schemas/EmptySuccessResponse'
+                $ref: '#/components/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
-  
-schemas:
-  CreateChannelRequest:
-    type: object
-    properties:
-      name:
-        type: string
-        description: The name of the new channel
-        example: Substitute Skaters
-      member_ids:
-        type: string list
-        description: User IDs of channel participants
-        example: [UserA, UserB, UserC]
-      image_string:
-        type: string
-        description: (optional) string svg image to will represent the channel
-        example: <text x="10" y="10">Hello World!</text>
-      description:
-        type: string
-        description: (optional) description of the channel
-        example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
-  
-  DeleteChannelRequest:
-    type: object
-    properties:
-      channel_id:
-        type: string
-        description: The ID of the target channel
-        example: "0"
+  rename:
+    put:
+      tags:
+        - "Chat: Channels"
+      summary: Rename a channel
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The body should contain a channel ID and the new name for that channel
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameRequest"
 
-  AddOrRemoveUserFromChannelRequest:
-    type: object
-    properties:
-      channel_id:
-        type: string
-        description: The ID of the target channel
-        example: "0"
-      value:
-        type: string
-        description: The ID of the target user
-        example: "0"
+components:
+  schemas:
+    CreateChannelRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the new channel
+          example: Substitute Skaters
+        member_ids:
+          type: string list
+          description: User IDs of channel participants
+          example: [UserA, UserB, UserC]
+        image_string:
+          type: string
+          description: (optional) string svg image to will represent the channel
+          example: <text x="10" y="10">Hello World!</text>
+        description:
+          type: string
+          description: (optional) description of the channel
+          example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
 
-  EmptySuccessResponse:
-    type: object
-    properties:
-      status_code:
-        $ref: "../common/schemas.yml#/schemas/StatusCode200"
-      status_string:
-        $ref: "../common/schemas.yml#/schemas/StatusString200"
-      request_id:
-        $ref: "../common/schemas.yml#/schemas/RequestId"
+    DeleteChannelRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+
+    AddOrRemoveUserFromChannelRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+        value:
+          type: string
+          description: The ID of the target user
+          example: "0"
+
+    EmptySuccessResponse:
+      type: object
+      properties:
+        status_code:
+          $ref: "../common/schemas.yml#/schemas/StatusCode200"
+        status_string:
+          $ref: "../common/schemas.yml#/schemas/StatusString200"
+        request_id:
+          $ref: "../common/schemas.yml#/schemas/RequestId"
+
+    RenameRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+        name:
+          type: string
+          description: The new name for the target channel
+          example: "Work Team 2"
