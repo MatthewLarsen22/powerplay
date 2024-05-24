@@ -2,7 +2,7 @@ package models
 
 type Channel struct {
 	DbModel
-	ImageURL    string   `json:"image_url"`
+	ImageString string   `json:"image_string"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	MemberIDs   []string `json:"member_ids" gorm:"type:text[]"`
