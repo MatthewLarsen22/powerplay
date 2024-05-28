@@ -1,8 +1,6 @@
 package chat
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/jak103/powerplay/internal/server/apis"
 	"github.com/jak103/powerplay/internal/server/services/auth"
@@ -10,8 +8,8 @@ import (
 	"github.com/jak103/powerplay/internal/utils/responder"
 )
 
-var nextID = 0
-var channels = make(map[string]ChannelConfiguration)
+var nextID int = 1
+var channels = make(map[int]ChannelConfiguration)
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
@@ -49,7 +47,7 @@ func createChannel(c *fiber.Ctx) error {
 	}
 
 	// Create a channel using the provided data
-	channels[strconv.Itoa(nextID)] = *channel // TODO: store channels in the DB instead of just in a dictionary.
+	channels[nextID] = *channel // TODO: store channels in the DB instead of just in a dictionary.
 	nextID += 1
 	log.Info("Channel created: " + channel.Name)
 	return responder.Ok(c)
@@ -67,7 +65,7 @@ func deleteChannel(c *fiber.Ctx) error {
 	var errorMsg string
 	_, channelExists := channels[channelID.Value] // TODO: retrieve the channel from the DB
 	if !channelExists {
-		errorMsg += "\tChannel " + channelID.Value + " does not exist.\n"
+		errorMsg += "\tChannel does not exist.\n"
 	}
 	if errorMsg != "" {
 		log.Info("The channel could not be deleted. Reason(s):\n" + errorMsg)
@@ -75,12 +73,12 @@ func deleteChannel(c *fiber.Ctx) error {
 	}
 
 	delete(channels, channelID.Value) // TODO: delete the channel from the DB
-	log.Info("Deleted channel " + channelID.Value)
+	log.Info("Deleted channel")
 	return responder.Ok(c)
 }
 
 func updateImage(c *fiber.Ctx) error {
-	updateData := new(ChannelUpdate)
+	updateData := new(ChannelPropertyChange)
 
 	// Load the request body as a ChannelUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
@@ -91,13 +89,13 @@ func updateImage(c *fiber.Ctx) error {
 	var errorMsg string
 	var channel ChannelConfiguration
 	var channelOk bool
-	if updateData.ChannelID == "" {
+	if updateData.ChannelID == 0 {
 		errorMsg += "\t'channel_id' is a required field.\n"
 	} else {
 		// Retrieve the channel specified in the channel_id field.
 		channel, channelOk = channels[updateData.ChannelID] // TODO: retrieve the channel from the DB.
 		if !channelOk {
-			errorMsg += "\tNo channel exists with ID " + updateData.ChannelID + ".\n"
+			errorMsg += "\tSpecified channel does not exist.\n"
 		}
 	}
 	if updateData.Value == "" {
@@ -110,12 +108,12 @@ func updateImage(c *fiber.Ctx) error {
 
 	channel.ImageString = updateData.Value // TODO: update the member_ids list in the database
 	channels[updateData.ChannelID] = channel
-	log.Info("Channel " + updateData.ChannelID + " image updated")
+	log.Info("Channel image updated")
 	return responder.Ok(c)
 }
 
 func updateDescription(c *fiber.Ctx) error {
-	updateData := new(ChannelUpdate)
+	updateData := new(ChannelPropertyChange)
 
 	// Load the request body as a ChannelUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
@@ -126,13 +124,13 @@ func updateDescription(c *fiber.Ctx) error {
 	var errorMsg string
 	var channel ChannelConfiguration
 	var channelOk bool
-	if updateData.ChannelID == "" {
+	if updateData.ChannelID == 0 {
 		errorMsg += "\t'channel_id' is a required field.\n"
 	} else {
 		// Retrieve the channel specified in the channel_id field.
 		channel, channelOk = channels[updateData.ChannelID] // TODO: retrieve the channel from the DB.
 		if !channelOk {
-			errorMsg += "\tNo channel exists with ID " + updateData.ChannelID + ".\n"
+			errorMsg += "\tThe specified channel does not exist.\n"
 		}
 	}
 	if updateData.Value == "" {
@@ -145,12 +143,12 @@ func updateDescription(c *fiber.Ctx) error {
 
 	channel.Description = updateData.Value // TODO: update the member_ids list in the database
 	channels[updateData.ChannelID] = channel
-	log.Info("Channel " + updateData.ChannelID + " description updated")
+	log.Info("Channel description updated")
 	return responder.Ok(c)
 }
 
 func addUser(c *fiber.Ctx) error {
-	updateData := new(ChannelUpdate)
+	updateData := new(ChannelUserChange)
 
 	// Load the request body as a ChannelUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
@@ -161,17 +159,17 @@ func addUser(c *fiber.Ctx) error {
 	var errorMsg string
 	var channel ChannelConfiguration
 	var channelOk bool
-	if updateData.ChannelID == "" {
+	if updateData.ChannelID == 0 {
 		errorMsg += "\t'channel_id' is a required field.\n"
 	} else {
 		// Retrieve the channel specified in the channel_id field.
 		channel, channelOk = channels[updateData.ChannelID] // TODO: retrieve the channel from the DB.
 		if !channelOk {
-			errorMsg += "\tNo channel exists with ID " + updateData.ChannelID + ".\n"
+			errorMsg += "\tThe specified channel does not exist.\n"
 		}
 	}
-	if updateData.Value == "" {
-		errorMsg += "\t'value' is a required field.\n"
+	if updateData.UserID == 0 {
+		errorMsg += "\t'user_id' is a required field.\n"
 	}
 	// TODO: verify that the provided value is a valid user ID
 	// TODO: verify that the user ID has not already been added to the channel
@@ -180,14 +178,14 @@ func addUser(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	channel.MemberIDs = append(channel.MemberIDs, updateData.Value) // TODO: update the member_ids list in the database
+	channel.MemberIDs = append(channel.MemberIDs, updateData.UserID) // TODO: update the member_ids list in the database
 	channels[updateData.ChannelID] = channel
-	log.Info("User " + updateData.Value + " added to channel " + updateData.ChannelID)
+	log.Info("User added to channel")
 	return responder.Ok(c)
 }
 
 func removeUser(c *fiber.Ctx) error {
-	updateData := new(ChannelUpdate)
+	updateData := new(ChannelUserChange)
 
 	// Load the request body as a ChannelUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
@@ -199,28 +197,28 @@ func removeUser(c *fiber.Ctx) error {
 	var channel ChannelConfiguration
 	var channelOk bool
 	var userIndex = -1
-	if updateData.ChannelID == "" {
+	if updateData.ChannelID == 0 {
 		errorMsg += "\t'channel_id' is a required field.\n"
 	} else {
 		// Retrieve the channel specified in the channel_id field.
 		channel, channelOk = channels[updateData.ChannelID] // TODO: retrieve the channel from the DB.
 		if !channelOk {
-			errorMsg += "\tNo channel exists with ID " + updateData.ChannelID + ".\n"
+			errorMsg += "\tThe specified channel does not exist.\n"
 		}
 	}
-	if updateData.Value == "" {
+	if updateData.UserID == 0 {
 		errorMsg += "\t'value' is a required field.\n"
 	} else {
 		if channelOk {
 			for i, v := range channel.MemberIDs {
-				if v == updateData.Value {
+				if v == updateData.UserID {
 					userIndex = i
 					break
 				}
 			}
 
 			if userIndex < 0 {
-				errorMsg += "\tUser " + updateData.Value + " is not a participant in channel " + updateData.ChannelID + ".\n"
+				errorMsg += "\tThe specified user is not a participant in the specified channel.\n"
 			}
 		}
 	}
@@ -233,25 +231,30 @@ func removeUser(c *fiber.Ctx) error {
 	if len(channel.MemberIDs) > 1 {
 		channel.MemberIDs = append(channel.MemberIDs[:userIndex], channel.MemberIDs[userIndex+1:]...)
 	} else {
-		channel.MemberIDs = make([]string, 0)
+		channel.MemberIDs = make([]int, 0)
 	}
 	channels[updateData.ChannelID] = channel
-	log.Info("User " + updateData.Value + " removed from channel " + updateData.ChannelID)
+	log.Info("User removed from channel.")
 	return responder.Ok(c)
 }
 
 type ChannelID struct {
-	Value string `json:"channel_id"`
+	Value int `json:"channel_id"`
 }
 
-type ChannelUpdate struct {
-	ChannelID string `json:"channel_id"`
+type ChannelUserChange struct {
+	ChannelID int `json:"channel_id"`
+	UserID    int `json:"user_id"`
+}
+
+type ChannelPropertyChange struct {
+	ChannelID int    `json:"channel_id"`
 	Value     string `json:"value"`
 }
 
 type ChannelConfiguration struct {
-	Name        string   `json:"name"`
-	MemberIDs   []string `json:"member_ids"`
-	ImageString string   `json:"image_string"`
-	Description string   `json:"description"`
+	Name        string `json:"name"`
+	MemberIDs   []int  `json:"member_ids"`
+	ImageString string `json:"image_string"`
+	Description string `json:"description"`
 }
