@@ -169,7 +169,7 @@ components:
           description: The name of the new channel
           example: Substitute Skaters
         member_ids:
-          type: int slice
+          type: integer[]
           description: User IDs of channel participants
           example: [1, 2, 3]
         image_string:
@@ -185,7 +185,7 @@ components:
       type: object
       properties:
         channel_id:
-          type: int
+          type: integer
           description: The ID of the target channel
           example: 1
 
@@ -193,7 +193,7 @@ components:
       type: object
       properties:
         channel_id:
-          type: int
+          type: integer
           description: The ID of the target channel
           example: 1
         value:
@@ -205,7 +205,7 @@ components:
       type: object
       properties:
         channel_id:
-          type: int
+          type: integer
           description: The ID of the target channel
           example: 1
         value:
@@ -217,11 +217,11 @@ components:
       type: object
       properties:
         channel_id:
-          type: int
+          type: integer
           description: The ID of the target channel
           example: 1
         user_id:
-          type: int
+          type: integer
           description: The ID of the target user
           example: 5
 
@@ -239,7 +239,7 @@ components:
       type: object
       properties:
         channel_id:
-          type: int
+          type: integer
           description: The ID of the target channel
           example: 1
         name:

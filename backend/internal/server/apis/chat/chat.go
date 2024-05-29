@@ -8,8 +8,8 @@ import (
 	"github.com/jak103/powerplay/internal/utils/responder"
 )
 
-var nextID int = 1
-var channels = make(map[int]ChannelConfiguration)
+var nextID uint = 1
+var channels = make(map[uint]ChannelConfiguration)
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
@@ -231,7 +231,7 @@ func removeUser(c *fiber.Ctx) error {
 	if len(channel.MemberIDs) > 1 {
 		channel.MemberIDs = append(channel.MemberIDs[:userIndex], channel.MemberIDs[userIndex+1:]...)
 	} else {
-		channel.MemberIDs = make([]int, 0)
+		channel.MemberIDs = make([]uint, 0)
 	}
 	channels[updateData.ChannelID] = channel
 	log.Info("User removed from channel.")
@@ -239,22 +239,22 @@ func removeUser(c *fiber.Ctx) error {
 }
 
 type ChannelID struct {
-	Value int `json:"channel_id"`
+	Value uint `json:"channel_id"`
 }
 
 type ChannelUserChange struct {
-	ChannelID int `json:"channel_id"`
-	UserID    int `json:"user_id"`
+	ChannelID uint `json:"channel_id"`
+	UserID    uint `json:"user_id"`
 }
 
 type ChannelPropertyChange struct {
-	ChannelID int    `json:"channel_id"`
+	ChannelID uint   `json:"channel_id"`
 	Value     string `json:"value"`
 }
 
 type ChannelConfiguration struct {
 	Name        string `json:"name"`
-	MemberIDs   []int  `json:"member_ids"`
+	MemberIDs   []uint `json:"member_ids"`
 	ImageString string `json:"image_string"`
 	Description string `json:"description"`
 }
