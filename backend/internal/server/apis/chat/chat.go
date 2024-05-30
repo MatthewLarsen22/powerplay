@@ -13,6 +13,7 @@ var channels = make(map[uint]ChannelConfiguration)
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
+	apis.RegisterHandler(fiber.MethodGet, "/chat/channels", auth.Public, listChannels)
 	apis.RegisterHandler(fiber.MethodPost, "/chat/channels/create", auth.Public, createChannel)
 	apis.RegisterHandler(fiber.MethodDelete, "/chat/channels/delete", auth.Public, deleteChannel)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/updateimage", auth.Public, updateImage)
@@ -23,6 +24,16 @@ func init() {
 
 func helloWorld(c *fiber.Ctx) error {
 	return c.SendString("Hello World")
+}
+
+func listChannels(c *fiber.Ctx) error {
+	channelList := make([]ChannelConfiguration, 0)
+
+	for _, value := range channels {
+		channelList = append(channelList, value)
+	}
+
+	return responder.OkWithData(c, channelList)
 }
 
 func createChannel(c *fiber.Ctx) error {
@@ -47,6 +58,7 @@ func createChannel(c *fiber.Ctx) error {
 	}
 
 	// Create a channel using the provided data
+	channel.ChannelID = nextID
 	channels[nextID] = *channel // TODO: store channels in the DB instead of just in a dictionary.
 	nextID += 1
 	log.Info("Channel created: " + channel.Name)
@@ -253,6 +265,7 @@ type ChannelPropertyChange struct {
 }
 
 type ChannelConfiguration struct {
+	ChannelID   uint   `json:"id"`
 	Name        string `json:"name"`
 	MemberIDs   []uint `json:"member_ids"`
 	ImageString string `json:"image_string"`

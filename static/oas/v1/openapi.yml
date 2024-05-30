@@ -10,6 +10,8 @@ info:
 paths:
   /auth:
     $ref: "./auth/auth.yml#/paths/auth"
+  /chat/channels:
+    $ref: "./chat/channels.yml#/paths/listChannels"
   /chat/channels/create:
     $ref: "./chat/channels.yml#/paths/createChannel"
   /chat/channels/delete:

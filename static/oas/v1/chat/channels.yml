@@ -1,4 +1,22 @@
 paths:
+  listChannels:
+    get:
+      tags:
+        - "Chat: Channels"
+      summary: List all available chat channels
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      responses:
+        200:
+          description: Created channel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelListResponse"
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+
   createChannel:
     post:
       tags:
@@ -234,6 +252,31 @@ components:
           $ref: "../common/schemas.yml#/schemas/StatusString200"
         request_id:
           $ref: "../common/schemas.yml#/schemas/RequestId"
+
+    ChannelListResponse:
+      type: object
+      properties:
+        status_code:
+          $ref: "../common/schemas.yml#/schemas/StatusCode200"
+        status_string:
+          $ref: "../common/schemas.yml#/schemas/StatusString200"
+        request_id:
+          $ref: "../common/schemas.yml#/schemas/RequestId"
+        response_data:
+          type: list
+          description: A list of available chat channels
+          example: [
+            {
+              "name": "Substitute Skaters",
+              "member_ids": [
+                1,
+                2,
+                3
+              ],
+              "image_string": "<text x=\"10\" y=\"10\">Hello World!</text>",
+              "description": "This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!"
+            },
+          ]
 
     RenameRequest:
       type: object
