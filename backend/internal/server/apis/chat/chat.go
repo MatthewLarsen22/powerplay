@@ -19,6 +19,7 @@ func init() {
 	apis.RegisterHandler(fiber.MethodDelete, "/chat/channels/delete", auth.Public, deleteChannel)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/updateimage", auth.Public, updateImage)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/updatedescription", auth.Public, updateDescription)
+	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/rename", auth.Public, rename)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
 }
@@ -157,6 +158,41 @@ func updateDescription(c *fiber.Ctx) error {
 	channel.Description = updateData.Value // TODO: update the member_ids list in the database
 	channels[updateData.ChannelID] = channel
 	log.Info("Channel description updated")
+	return responder.Ok(c)
+}
+
+func rename(c *fiber.Ctx) error {
+	updateData := new(ChannelPropertyChange)
+
+	// Load the request body as a ChannelUpdate object. If any of the provided values are the wrong type, the request is bad.
+	if err := c.BodyParser(updateData); err != nil {
+		return responder.BadRequest(c)
+	}
+
+	// Verify that values were provided for required fields and verify the existence of the channel. If any required values are missing or the channel doesn't exist, the request is bad.
+	var errorMsg string
+	var channel models.Channel
+	var channelOk bool
+	if updateData.ChannelID == 0 {
+		errorMsg += "\t'channel_id' is a required field.\n"
+	} else {
+		// Retrieve the channel specified in the channel_id field.
+		channel, channelOk = channels[updateData.ChannelID] // TODO: retrieve the channel from the DB.
+		if !channelOk {
+			errorMsg += "\tThe specified channel does not exist.\n"
+		}
+	}
+	if updateData.Value == "" {
+		errorMsg += "\t'value' is a required field.\n"
+	}
+	if errorMsg != "" {
+		log.Info("Channel description could not be updated. Reason(s):\n" + errorMsg)
+		return responder.BadRequest(c)
+	}
+
+	channel.Name = updateData.Value
+	channels[updateData.ChannelID] = channel
+	log.Info("Channel name updated")
 	return responder.Ok(c)
 }
 
