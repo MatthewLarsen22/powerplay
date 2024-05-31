@@ -1,0 +1,135 @@
+paths:
+  message:
+    get:
+      summary: Get single message
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      tags:
+        - 'Chat: Message'
+      operation-id: get-message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/GetMessageRequest'
+      responses:
+        200:
+          description: Message retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/GetMessageResponse'
+        400:
+          $ref: "./common/errors.yml#/responses/BadRequest"
+    post:
+      summary: Creates a single message
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      tags:
+        - 'Chat: Message'
+      operation-id: post-message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/CreateMessageRequest'
+      responses:
+        200:
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/CreateMessageResponse' 
+        400:
+          $ref: "./common/errors.yml#/responses/BadRequest"
+
+schemas:
+  GetMessageRequest:
+    type: object
+    properties:
+      messageID:
+        type: integer
+        description: Message ID of requested message
+        example: 0
+  GetMessageResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Log-message for sent chat-message
+        example: Message sent successfully
+      status_code:
+        $ref: "../common/schemas.yml#/schemas/StatusCode200"
+      status_string:
+        $ref: "../common/schemas.yml#/schemas/StatusString200"
+      request_id:
+        $ref: "../common/schemas.yml#/schemas/RequestId"
+      response_data:
+        type: object
+        properties:
+          messageID:
+            type: integer
+            description: Message ID of requested message
+            example: 0
+          senderID:
+            type: integer
+            description: User ID of sender
+            example: 0
+          content:
+            type: string
+            description: Message content
+            example: 'Comms check, testing'
+          createdAt:
+            type: string
+            description: Time when message was sent
+            example: 'some time'
+          channelID:
+            type: integer
+            description: Channel ID where message was posted
+            example: 0
+          recipientIDs:
+            type: array
+            description: User IDs of message recipients
+            example: [1, 2, 3]
+  CreateMessageRequest:
+    type: object
+    properties:
+      senderID:
+        type: integer
+        description: User ID of sender
+        example: 0
+      content:
+        type: string
+        description: Message content
+        example: 'Comms check, testing'
+      channelID:
+        type: integer
+        description: Channel ID where message was posted
+        example: 0
+      recipientIDs:
+        description: User IDs of message recipients
+        type: array
+        example: [1, 2, 3]
+  CreateMessageResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Log-message for sent chat-message
+        example: Message sent successfully
+      status_code:
+        $ref: "../common/schemas.yml#/schemas/StatusCode200"
+      status_string:
+        $ref: "../common/schemas.yml#/schemas/StatusString200"
+      request_id:
+        $ref: "../common/schemas.yml#/schemas/RequestId"
+      response_data:
+        type: object
+        properties:
+          messageID:
+            type: integer
+            example: 0

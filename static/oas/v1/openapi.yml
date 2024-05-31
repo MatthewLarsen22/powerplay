@@ -10,6 +10,8 @@ info:
 paths:
   /auth:
     $ref: "./auth/auth.yml#/paths/auth"
+  /message:
+    $ref: "./chat/message.yml#/paths/message"
   /chat/channels:
     $ref: "./chat/channels.yml#/paths/listChannels"
   /chat/channels/create:
@@ -26,6 +28,21 @@ paths:
     $ref: "./chat/channels.yml#/paths/updateChannelDescription"
   /chat/channels/rename:
     $ref: "./chat/channels.yml#/paths/rename"
+  /shotsongoal:
+    $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"   
+  /penaltyTypes:
+    $ref: "./stats/penalties.yml#/paths/penaltyTypes"
+  /leagues:
+    $ref: "./leagues/leagues.yaml#/paths/leagues"
+  /penalties:
+    $ref: "./stats/penalties.yml#/paths/penalties"
+  /user:
+    $ref: "./users/users.yml#/paths/user"
+
+  # /[URL path]
+  #$ref: "./[Relative path starting from v1]#/paths/[yml path]"
+  /goals:
+    $ref: "./stats/goal.yml#/paths/goals"
 
 components:
   securitySchemes:
