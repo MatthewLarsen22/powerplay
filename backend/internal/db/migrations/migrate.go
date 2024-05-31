@@ -60,6 +60,16 @@ func init() {
 				return tx.Migrator().DropTable("goals")
 			},
 		},
+
+		&gormigrate.Migration{
+			ID: "create_channels_table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&models.Channel{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable("channels")
+			},
+		},
 		// Add more migrations here
 	)
 }
