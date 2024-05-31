@@ -2,6 +2,7 @@ package chat
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/jak103/powerplay/internal/models"
 	"github.com/jak103/powerplay/internal/server/apis"
 	"github.com/jak103/powerplay/internal/server/services/auth"
 	"github.com/jak103/powerplay/internal/utils/log"
@@ -9,7 +10,7 @@ import (
 )
 
 var nextID uint = 1
-var channels = make(map[uint]ChannelConfiguration)
+var channels = make(map[uint]models.Channel)
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
@@ -27,7 +28,7 @@ func helloWorld(c *fiber.Ctx) error {
 }
 
 func listChannels(c *fiber.Ctx) error {
-	channelList := make([]ChannelConfiguration, 0)
+	channelList := make([]models.Channel, 0)
 
 	for _, value := range channels {
 		channelList = append(channelList, value)
@@ -37,7 +38,7 @@ func listChannels(c *fiber.Ctx) error {
 }
 
 func createChannel(c *fiber.Ctx) error {
-	channel := new(ChannelConfiguration)
+	channel := new(models.Channel)
 
 	// Load the request body as a ChannelConfiguration object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(channel); err != nil {
@@ -58,7 +59,7 @@ func createChannel(c *fiber.Ctx) error {
 	}
 
 	// Create a channel using the provided data
-	channel.ChannelID = nextID
+	channel.ID = nextID
 	channels[nextID] = *channel // TODO: store channels in the DB instead of just in a dictionary.
 	nextID += 1
 	log.Info("Channel created: " + channel.Name)
@@ -99,7 +100,7 @@ func updateImage(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the channel. If any required values are missing or the channel doesn't exist, the request is bad.
 	var errorMsg string
-	var channel ChannelConfiguration
+	var channel models.Channel
 	var channelOk bool
 	if updateData.ChannelID == 0 {
 		errorMsg += "\t'channel_id' is a required field.\n"
@@ -134,7 +135,7 @@ func updateDescription(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the channel. If any required values are missing or the channel doesn't exist, the request is bad.
 	var errorMsg string
-	var channel ChannelConfiguration
+	var channel models.Channel
 	var channelOk bool
 	if updateData.ChannelID == 0 {
 		errorMsg += "\t'channel_id' is a required field.\n"
@@ -169,7 +170,7 @@ func addUser(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the channel. If any required values are missing or the channel doesn't exist, the request is bad.
 	var errorMsg string
-	var channel ChannelConfiguration
+	var channel models.Channel
 	var channelOk bool
 	if updateData.ChannelID == 0 {
 		errorMsg += "\t'channel_id' is a required field.\n"
@@ -206,7 +207,7 @@ func removeUser(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the channel. If any required values are missing or the channel doesn't exist, the request is bad.
 	var errorMsg string
-	var channel ChannelConfiguration
+	var channel models.Channel
 	var channelOk bool
 	var userIndex = -1
 	if updateData.ChannelID == 0 {
@@ -262,12 +263,4 @@ type ChannelUserChange struct {
 type ChannelPropertyChange struct {
 	ChannelID uint   `json:"channel_id"`
 	Value     string `json:"value"`
-}
-
-type ChannelConfiguration struct {
-	ChannelID   uint   `json:"id"`
-	Name        string `json:"name"`
-	MemberIDs   []uint `json:"member_ids"`
-	ImageString string `json:"image_string"`
-	Description string `json:"description"`
 }
