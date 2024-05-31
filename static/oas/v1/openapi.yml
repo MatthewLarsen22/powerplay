@@ -10,6 +10,20 @@ info:
 paths:
   /auth:
     $ref: "./auth/auth.yml#/paths/auth"
+  /message:
+    $ref: "./chat/message.yml#/paths/message"
+  /chat/channels/create:
+    $ref: "./chat/channels.yml#/paths/createChannel"
+  /chat/channels/delete:
+    $ref: "./chat/channels.yml#/paths/deleteChannel"
+  /chat/channels/adduser:
+    $ref: "./chat/channels.yml#/paths/addUser"
+  /chat/channels/removeuser:
+    $ref: "./chat/channels.yml#/paths/removeUser"
+  /chat/channels/updateimage:
+    $ref: "./chat/channels.yml#/paths/updateChannelImage"
+  /chat/channels/rename:
+    $ref: "./chat/channels.yml#/paths/rename"
   /shotsongoal:
     $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"   
   /penaltyTypes:

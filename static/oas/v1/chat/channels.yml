@@ -1,0 +1,223 @@
+paths:
+  createChannel:
+    post:
+      tags:
+        - "Chat: Channels"
+      summary: Create a new chat channel 
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a name for the new channel and a list of member ids representing the individuals who will participate in the channel. Optionally, the request may also include an image string and/or a description of the channel. 
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChannelRequest"
+      responses:
+        200:
+          description: Created channel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptySuccessResponse"
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  deleteChannel:
+    delete:
+      tags:
+        - "Chat: Channels"
+      summary: Delete a chat channel 
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain the channel ID.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteChannelRequest"
+      responses:
+        200:
+          description: Deleted channel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptySuccessResponse"
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  updateChannelImage:
+    put:
+      tags:
+        - "Chat: Channels"
+      summary: Update the image for a chat channel
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a channel ID and an image string value.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChannelImageRequest"
+      responses:
+        200:
+          description: Updated image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptySuccessResponse"
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  addUser:
+    put:
+      tags:
+        - "Chat: Channels"
+      summary: Add a user to a channel
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a channel ID and a user ID value.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddOrRemoveUserFromChannelRequest"
+      responses:
+        200:
+          description: Added user to channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptySuccessResponse'
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  removeUser:
+    put:
+      tags:
+        - "Chat: Channels"
+      summary: Remove a user from a channel
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a channel ID and a user ID value.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddOrRemoveUserFromChannelRequest"
+      responses:
+        200:
+          description: Added user to channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptySuccessResponse'
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+  rename:
+    put:
+      tags:
+        - "Chat: Channels"
+      summary: Rename a channel
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The body should contain a channel ID and the new name for that channel
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameRequest"
+
+components:
+  schemas:
+    CreateChannelRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the new channel
+          example: Substitute Skaters
+        member_ids:
+          type: string list
+          description: User IDs of channel participants
+          example: [UserA, UserB, UserC]
+        image_string:
+          type: string
+          description: (optional) string svg image to will represent the channel
+          example: <text x="10" y="10">Hello World!</text>
+        description:
+          type: string
+          description: (optional) description of the channel
+          example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
+
+    DeleteChannelRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+
+    UpdateChannelImageRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+        value:
+          type: string
+          description: An image string to represent the channel
+          example: <text x="10" y="10">Hello World!</text>
+
+    AddOrRemoveUserFromChannelRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+        value:
+          type: string
+          description: The ID of the target user
+          example: "0"
+      AddOrRemoveUserFromChannelRequest:
+        type: object
+        properties:
+          channel_id:
+            type: string
+            description: The ID of the target channel
+            example: "0"
+          value:
+            type: string
+            description: The ID of the target user
+            example: "0"
+
+    EmptySuccessResponse:
+      type: object
+      properties:
+        status_code:
+          $ref: "../common/schemas.yml#/schemas/StatusCode200"
+        status_string:
+          $ref: "../common/schemas.yml#/schemas/StatusString200"
+        request_id:
+          $ref: "../common/schemas.yml#/schemas/RequestId"
+
+    RenameRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: The ID of the target channel
+          example: "0"
+        name:
+          type: string
+          description: The new name for the target channel
+          example: "Work Team 2"
