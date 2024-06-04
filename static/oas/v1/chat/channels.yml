@@ -197,7 +197,7 @@ components:
         description:
           type: string
           description: (optional) description of the channel
-          example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
+          example: Use this channel to arrange for substitute skaters.
 
     DeleteChannelRequest:
       type: object
@@ -217,7 +217,7 @@ components:
         value:
           type: string
           description: An image string to represent the channel
-          example: <text x="10" y="10">Hello World!</text>
+          example: <text x="10" y="10">Hello Skaters!</text>
 
     UpdateChannelDescriptionRequest:
       type: object
@@ -229,7 +229,7 @@ components:
         value:
           type: string
           description: A description of the channel
-          example: This is where I will explain the purpose of the channel.
+          example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
 
     AddOrRemoveUserFromChannelRequest:
       type: object
