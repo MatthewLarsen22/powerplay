@@ -26,7 +26,7 @@ paths:
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       requestBody:
-        description: The request body must contain a name for the new channel and a list of member ids representing the individuals who will participate in the channel. Optionally, the request may also include an image string and/or a description of the channel. 
+        description: The request body must contain a name for the new channel and a list of participats to be included in the channel. Optionally, the request may also include an image string and/or a description of the channel. 
         required: true
         content:
           application/json:
@@ -186,7 +186,7 @@ components:
           type: string
           description: The name of the new channel
           example: Substitute Skaters
-        member_ids:
+        participants:
           type: integer[]
           description: User IDs of channel participants
           example: [1, 2, 3]
@@ -268,7 +268,7 @@ components:
           example: [
             {
               "name": "Substitute Skaters",
-              "member_ids": [
+              "participants": [
                 1,
                 2,
                 3

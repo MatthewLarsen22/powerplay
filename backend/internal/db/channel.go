@@ -8,7 +8,7 @@ func (s session) GetChannels() ([]models.Channel, error) {
 	return resultsOrError(channels, err)
 }
 
-func (s session) CreateChannel(request *models.Channel) error {
-	result := s.connection.Create(request)
-	return result.Error
+func (s session) CreateChannel(channel *models.Channel) (*models.Channel, error) {
+	result := s.connection.Create(channel)
+	return resultOrError(channel, result)
 }

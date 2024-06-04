@@ -38,20 +38,23 @@ func listChannels(c *fiber.Ctx) error {
 }
 
 func createChannel(c *fiber.Ctx) error {
-	channel := new(models.Channel)
+	log.Info("Creating a channel")
+	channelConfig := new(ChannelConfiguration)
 
 	// Load the request body as a ChannelConfiguration object. If any of the provided values are the wrong type, the request is bad.
-	if err := c.BodyParser(channel); err != nil {
+	if err := c.BodyParser(channelConfig); err != nil {
+		log.Info("Encountered an error while parsing the body of the request")
+		log.Info(err.Error())
 		return responder.BadRequest(c)
 	}
 
 	// Verify that values were provided for required fields. If any required values are missing, the request is bad.
 	var errorMsg string
-	if channel.Name == "" {
+	if channelConfig.Name == "" {
 		errorMsg += "\t'name' is a required field.\n"
 	}
-	if channel.MemberIDs == nil {
-		errorMsg += "\t'member_ids' is a required field.\n"
+	if channelConfig.Participants == nil {
+		errorMsg += "\t'participants' is a required field.\n"
 	}
 	if errorMsg != "" {
 		log.Info("Channel creation failed. Reason(s):\n" + errorMsg)
@@ -59,10 +62,36 @@ func createChannel(c *fiber.Ctx) error {
 	}
 
 	// Create a channel using the provided data
+
+	// session := db.GetSession(c)
+	// record, err := session.CreateChannel(channel)
+	channel := models.Channel{}
 	channel.ID = nextID
-	channels[nextID] = *channel // TODO: store channels in the DB instead of just in a dictionary.
-	nextID += 1
+	channel.Name = channelConfig.Name
+	channel.Description = channelConfig.Description
+	channel.ImageString = channelConfig.ImageString
+	channel.Participants = make([]models.User, 0)
+
+	for _, u := range channelConfig.Participants {
+		user := models.User{}
+		user.ID = u
+		channel.Participants = append(channel.Participants, user)
+	}
+
+	channels[nextID] = channel // TODO: store channels in the DB instead of just in a dictionary.
 	log.Info("Channel created: " + channel.Name)
+	nextID += 1
+
+	// if err != nil {
+	// 	log.WithErr(err).Alert("Failed to parse channel request payload")
+	// 	log.Info("Participants: %T", channel.Participants)
+	// 	return responder.InternalServerError(c)
+	// }
+
+	// if record == nil {
+	// 	return responder.BadRequest(c, "Could not post channel into database")
+	// }
+
 	return responder.Ok(c)
 }
 
@@ -119,7 +148,7 @@ func updateImage(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	channel.ImageString = updateData.Value // TODO: update the member_ids list in the database
+	channel.ImageString = updateData.Value // TODO: update the participants list in the database
 	channels[updateData.ChannelID] = channel
 	log.Info("Channel image updated")
 	return responder.Ok(c)
@@ -154,7 +183,7 @@ func updateDescription(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	channel.Description = updateData.Value // TODO: update the member_ids list in the database
+	channel.Description = updateData.Value // TODO: update the participants list in the database
 	channels[updateData.ChannelID] = channel
 	log.Info("Channel description updated")
 	return responder.Ok(c)
@@ -191,7 +220,13 @@ func addUser(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	channel.MemberIDs = append(channel.MemberIDs, updateData.UserID) // TODO: update the member_ids list in the database
+	// TODO: retrieve the user corresponding to the ID user from the database
+	user := models.User{
+		FirstName: "anonymous",
+	}
+	user.ID = updateData.UserID
+
+	channel.Participants = append(channel.Participants, user) // TODO: update the participants list in the database
 	channels[updateData.ChannelID] = channel
 	log.Info("User added to channel")
 	return responder.Ok(c)
@@ -223,8 +258,8 @@ func removeUser(c *fiber.Ctx) error {
 		errorMsg += "\t'value' is a required field.\n"
 	} else {
 		if channelOk {
-			for i, v := range channel.MemberIDs {
-				if v == updateData.UserID {
+			for i, v := range channel.Participants {
+				if v.ID == updateData.UserID {
 					userIndex = i
 					break
 				}
@@ -240,11 +275,11 @@ func removeUser(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	// TODO: update the member_ids list in the database
-	if len(channel.MemberIDs) > 1 {
-		channel.MemberIDs = append(channel.MemberIDs[:userIndex], channel.MemberIDs[userIndex+1:]...)
+	// TODO: update the participants list in the database
+	if len(channel.Participants) > 1 {
+		channel.Participants = append(channel.Participants[:userIndex], channel.Participants[userIndex+1:]...)
 	} else {
-		channel.MemberIDs = make([]uint, 0)
+		channel.Participants = make([]models.User, 0)
 	}
 	channels[updateData.ChannelID] = channel
 	log.Info("User removed from channel.")
@@ -263,4 +298,11 @@ type ChannelUserChange struct {
 type ChannelPropertyChange struct {
 	ChannelID uint   `json:"channel_id"`
 	Value     string `json:"value"`
+}
+
+type ChannelConfiguration struct {
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	ImageString  string `json:"image_string"`
+	Participants []uint `json:"participants"`
 }
