@@ -8,7 +8,6 @@ import (
 	"github.com/jak103/powerplay/internal/server/services/auth"
 	"github.com/jak103/powerplay/internal/utils/log"
 	"github.com/jak103/powerplay/internal/utils/responder"
-	"github.com/lib/pq"
 )
 
 var nextID uint = 1
@@ -72,7 +71,7 @@ func createChannel(c *fiber.Ctx) error {
 	channel.Name = channelConfig.Name
 	channel.Description = channelConfig.Description
 	channel.ImageString = channelConfig.ImageString
-	channel.Participants = pq.Int64(channelConfig.Participants)
+	// channel.Participants = channelConfig.Participants
 	session := db.GetSession(c)
 	record, err := session.CreateChannel(channel)
 
