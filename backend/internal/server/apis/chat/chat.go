@@ -18,7 +18,7 @@ var (
 )
 
 func init() {
-	apis.RegisterHandler(fiber.MethodGet, "/ws", nil, websocket.New(HandleConnections))
+	apis.RegisterHandler(fiber.MethodGet, "/chat", nil, websocket.New(HandleConnections))
 
 	go HandleMessages()
 }
