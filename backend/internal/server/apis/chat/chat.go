@@ -2,11 +2,13 @@ package chat
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/jak103/powerplay/internal/db"
 	"github.com/jak103/powerplay/internal/models"
 	"github.com/jak103/powerplay/internal/server/apis"
 	"github.com/jak103/powerplay/internal/server/services/auth"
 	"github.com/jak103/powerplay/internal/utils/log"
 	"github.com/jak103/powerplay/internal/utils/responder"
+	"github.com/lib/pq"
 )
 
 var nextID uint = 1
@@ -29,10 +31,12 @@ func helloWorld(c *fiber.Ctx) error {
 }
 
 func listChannels(c *fiber.Ctx) error {
-	channelList := make([]models.Channel, 0)
+	session := db.GetSession(c)
+	channelList, err := session.GetChannels()
 
-	for _, value := range channels {
-		channelList = append(channelList, value)
+	if err != nil {
+		log.WithErr(err).Alert("Failed to parse channel request payload")
+		return responder.InternalServerError(c)
 	}
 
 	return responder.OkWithData(c, channelList)
@@ -64,34 +68,27 @@ func createChannel(c *fiber.Ctx) error {
 
 	// Create a channel using the provided data
 
-	// session := db.GetSession(c)
-	// record, err := session.CreateChannel(channel)
-	channel := models.Channel{}
-	channel.ID = nextID
+	channel := new(models.Channel)
 	channel.Name = channelConfig.Name
 	channel.Description = channelConfig.Description
 	channel.ImageString = channelConfig.ImageString
-	channel.Participants = make([]models.User, 0)
+	channel.Participants = pq.Int64(channelConfig.Participants)
+	session := db.GetSession(c)
+	record, err := session.CreateChannel(channel)
 
-	for _, u := range channelConfig.Participants {
-		user := models.User{}
-		user.ID = u
-		channel.Participants = append(channel.Participants, user)
-	}
-
-	channels[nextID] = channel // TODO: store channels in the DB instead of just in a dictionary.
+	channels[nextID] = *channel // TODO: store channels in the DB instead of just in a dictionary.
 	log.Info("Channel created: " + channel.Name)
 	nextID += 1
 
-	// if err != nil {
-	// 	log.WithErr(err).Alert("Failed to parse channel request payload")
-	// 	log.Info("Participants: %T", channel.Participants)
-	// 	return responder.InternalServerError(c)
-	// }
+	if err != nil {
+		log.WithErr(err).Alert("Failed to parse channel request payload")
+		log.Info("Participants: %T", channel.Participants)
+		return responder.InternalServerError(c)
+	}
 
-	// if record == nil {
-	// 	return responder.BadRequest(c, "Could not post channel into database")
-	// }
+	if record == nil {
+		return responder.BadRequest(c, "Could not post channel into database")
+	}
 
 	return responder.Ok(c)
 }
@@ -262,7 +259,7 @@ func addUser(c *fiber.Ctx) error {
 	}
 	user.ID = updateData.UserID
 
-	channel.Participants = append(channel.Participants, user) // TODO: update the participants list in the database
+	// channel.Participants = append(channel.Participants, user) // TODO: update the participants list in the database
 	channels[updateData.ChannelID] = channel
 	log.Info("User added to channel")
 	return responder.Ok(c)
@@ -294,12 +291,12 @@ func removeUser(c *fiber.Ctx) error {
 		errorMsg += "\t'value' is a required field.\n"
 	} else {
 		if channelOk {
-			for i, v := range channel.Participants {
-				if v.ID == updateData.UserID {
-					userIndex = i
-					break
-				}
-			}
+			// for i, v := range channel.Participants {
+			// 	if v.ID == updateData.UserID {
+			// 		userIndex = i
+			// 		break
+			// 	}
+			// }
 
 			if userIndex < 0 {
 				errorMsg += "\tThe specified user is not a participant in the specified channel.\n"
@@ -312,11 +309,11 @@ func removeUser(c *fiber.Ctx) error {
 	}
 
 	// TODO: update the participants list in the database
-	if len(channel.Participants) > 1 {
-		channel.Participants = append(channel.Participants[:userIndex], channel.Participants[userIndex+1:]...)
-	} else {
-		channel.Participants = make([]models.User, 0)
-	}
+	// if len(channel.Participants) > 1 {
+	// 	channel.Participants = append(channel.Participants[:userIndex], channel.Participants[userIndex+1:]...)
+	// } else {
+	// 	channel.Participants = make([]models.User, 0)
+	// }
 	channels[updateData.ChannelID] = channel
 	log.Info("User removed from channel.")
 	return responder.Ok(c)
