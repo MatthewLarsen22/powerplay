@@ -186,10 +186,10 @@ components:
           type: string
           description: The name of the new channel
           example: Substitute Skaters
-        participants:
-          type: integer[]
-          description: User IDs of channel participants
-          example: [1, 2, 3]
+        type:
+          type: string
+          description: 'The channel type - must be either "channel" (for a conversation that can be joined by other users) or "dm" (for a private conversation that users can only access by invitation)'
+          example: channel
         image_string:
           type: string
           description: (optional) string svg image to will represent the channel
@@ -198,6 +198,10 @@ components:
           type: string
           description: (optional) description of the channel
           example: Use this channel to arrange for substitute skaters.
+        participants:
+          type: integer[]
+          description: User IDs of channel participants
+          example: [1, 2, 3]
 
     DeleteChannelRequest:
       type: object
@@ -268,14 +272,15 @@ components:
           example: [
             {
               "name": "Substitute Skaters",
+              "type": "channel",
+              "description": "This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!",
+              "image_string": "<text x=\"10\" y=\"10\">Hello World!</text>",
               "participants": [
                 1,
                 2,
                 3
-              ],
-              "image_string": "<text x=\"10\" y=\"10\">Hello World!</text>",
-              "description": "This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!"
-            },
+              ]
+            }
           ]
 
     RenameRequest:

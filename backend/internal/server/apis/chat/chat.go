@@ -57,6 +57,13 @@ func createChannel(c *fiber.Ctx) error {
 	if channelConfig.Name == "" {
 		errorMsg += "\t'name' is a required field.\n"
 	}
+	if channelConfig.Type == "" {
+		errorMsg += "\t'type' is  required field.\n"
+	} else {
+		if channelConfig.Type != models.CHANNEL && channelConfig.Type != models.DM {
+			errorMsg += "\t'type' must be \"channel\" or \"dm\"."
+		}
+	}
 	if channelConfig.Participants == nil {
 		errorMsg += "\t'participants' is a required field.\n"
 	}
@@ -69,6 +76,7 @@ func createChannel(c *fiber.Ctx) error {
 
 	channel := new(models.Channel)
 	channel.Name = channelConfig.Name
+	channel.Type = channelConfig.Type
 	channel.Description = channelConfig.Description
 	channel.ImageString = channelConfig.ImageString
 	// channel.Participants = channelConfig.Participants
@@ -333,8 +341,9 @@ type ChannelPropertyChange struct {
 }
 
 type ChannelConfiguration struct {
-	Name         string `json:"name"`
-	Description  string `json:"description"`
-	ImageString  string `json:"image_string"`
-	Participants []uint `json:"participants"`
+	Name         string             `json:"name"`
+	Type         models.ChannelType `json:"type"`
+	Description  string             `json:"description"`
+	ImageString  string             `json:"image_string"`
+	Participants []uint             `json:"participants"`
 }
