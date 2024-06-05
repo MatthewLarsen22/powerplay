@@ -1,46 +1,73 @@
 package chat
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/jak103/powerplay/internal/models"
 	"github.com/jak103/powerplay/internal/server/apis"
-	"github.com/jak103/powerplay/internal/server/services/auth"
+
+	"github.com/jak103/powerplay/internal/utils/log"
 )
 
-// Pseudo database of messages
-var messages []models.ChatMessage
+var (
+	messages  []models.ChatMessage // psuedo-database
+	clients   = make(map[*websocket.Conn]bool)
+	broadcast = make(chan models.ChatMessage)
+)
 
 func init() {
-	apis.RegisterHandler(fiber.MethodGet, "/chat", auth.Public, getMessages)
-	apis.RegisterHandler(fiber.MethodPost, "/chat", auth.Public, sendMessage)
+	apis.RegisterHandler(fiber.MethodGet, "/ws", nil, websocket.New(HandleConnections))
+
+	go HandleMessages()
 }
 
-func sendMessage(context *fiber.Ctx) error {
-	var message models.ChatMessage
-	err := context.BodyParser(&message)
-
-	if err != nil {
-		return err
+func WebsocketHandler(context *fiber.Ctx) error {
+	if websocket.IsWebSocketUpgrade(context) {
+		context.Locals("allowed", true)
+		return context.Next()
 	}
 
-	messages = append(messages, message)
-
-	return context.JSON(fiber.Map{
-		"status": "success",
-		"sent":   "true",
-		"data":   message,
-	})
+	return fiber.ErrUpgradeRequired
 }
 
-func getMessages(context *fiber.Ctx) error {
-	userID := context.Params("userID")
-	var missedMessages []models.ChatMessage
+func HandleConnections(connection *websocket.Conn) {
+	defer func() {
+		delete(clients, connection)
+		connection.Close()
+	}()
 
-	for _, message := range messages {
-		if message.RecipientID == userID {
-			missedMessages = append(missedMessages, message)
+	clients[connection] = true
+
+	for {
+		var message models.ChatMessage
+		err := connection.ReadJSON(&message)
+
+		if err != nil {
+			log.WithErr(err).Alert("Cannot Read message...")
+			delete(clients, connection)
+			break
+		}
+
+		message.CreatedAt = time.Now()
+		broadcast <- message
+	}
+}
+
+func HandleMessages() {
+	for {
+		message := <-broadcast
+		messages = append(messages, message)
+
+		for client := range clients {
+			err := client.WriteJSON(message)
+
+			if err != nil {
+				log.WithErr(err).Alert("Cannot write message")
+				client.Close()
+				delete(clients, client)
+			}
 		}
 	}
-
-	return context.JSON(missedMessages)
 }
