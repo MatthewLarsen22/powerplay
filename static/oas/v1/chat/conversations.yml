@@ -1,85 +1,85 @@
 paths:
-  listChannels:
+  listConversations:
     get:
       tags:
-        - "Chat: Channels"
-      summary: List all available chat channels
+        - "Chat: Conversations"
+      summary: List all available chat conversations
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       responses:
         200:
-          description: Created channel
+          description: Created conversation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ChannelListResponse"
+                $ref: "#/components/schemas/ConversationListResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
 
-  createChannel:
+  createConversation:
     post:
       tags:
-        - "Chat: Channels"
-      summary: Create a new chat channel 
+        - "Chat: Conversations"
+      summary: Create a new chat conversation 
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       requestBody:
-        description: The request body must contain a name for the new channel and a list of participats to be included in the channel. Optionally, the request may also include an image string and/or a description of the channel. 
+        description: The request body must contain a name for the new conversation and a list of participats to be included in the conversation. Optionally, the request may also include an image string and/or a description of the conversation. 
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateChannelRequest"
+              $ref: "#/components/schemas/CreateConversationRequest"
       responses:
         200:
-          description: Created channel
+          description: Created conversation
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
-  deleteChannel:
+  deleteConversation:
     delete:
       tags:
-        - "Chat: Channels"
-      summary: Delete a chat channel 
+        - "Chat: Conversations"
+      summary: Delete a chat conversation 
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       requestBody:
-        description: The request body must contain the channel ID.
+        description: The request body must contain the conversation ID.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteChannelRequest"
+              $ref: "#/components/schemas/DeleteConversationRequest"
       responses:
         200:
-          description: Deleted channel
+          description: Deleted conversation
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
-  updateChannelImage:
+  updateConversationImage:
     put:
       tags:
-        - "Chat: Channels"
-      summary: Update the image for a chat channel
+        - "Chat: Conversations"
+      summary: Update the image for a chat conversation
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       requestBody:
-        description: The request body must contain a channel ID and an image string value.
+        description: The request body must contain a conversation ID and an image string value.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateChannelImageRequest"
+              $ref: "#/components/schemas/UpdateConversationImageRequest"
       responses:
         200:
           description: Updated image
@@ -89,21 +89,21 @@ paths:
                 $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
-  updateChannelDescription:
+  updateConversationDescription:
     put:
       tags:
-        - "Chat: Channels"
-      summary: Update the description for a chat channel
+        - "Chat: Conversations"
+      summary: Update the description for a chat conversation
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
       requestBody:
-        description: The request body must contain a channel ID and an description string value.
+        description: The request body must contain a conversation ID and an description string value.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateChannelDescriptionRequest"
+              $ref: "#/components/schemas/UpdateConversationDescriptionRequest"
       responses:
         200:
           description: Updated description
@@ -116,21 +116,21 @@ paths:
   addUser:
     put:
       tags:
-        - "Chat: Channels"
-      summary: Add a user to a channel
+        - "Chat: Conversations"
+      summary: Add a user to a conversation
       description: |
         **REQUIRED PERMISSIONS:** TBD
         **RATE LIMIT:** TBD
       requestBody:
-        description: The request body must contain a channel ID and a user ID value.
+        description: The request body must contain a conversation ID and a user ID value.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddOrRemoveUserFromChannelRequest"
+              $ref: "#/components/schemas/AddOrRemoveUserFromConversationRequest"
       responses:
         200:
-          description: Added user to channel
+          description: Added user to conversation
           content:
             application/json:
               schema:
@@ -140,21 +140,21 @@ paths:
   removeUser:
     put:
       tags:
-        - "Chat: Channels"
-      summary: Remove a user from a channel
+        - "Chat: Conversations"
+      summary: Remove a user from a conversation
       description: |
         **REQUIRED PERMISSIONS:** TBD
         **RATE LIMIT:** TBD
       requestBody:
-        description: The request body must contain a channel ID and a user ID value.
+        description: The request body must contain a conversation ID and a user ID value.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddOrRemoveUserFromChannelRequest"
+              $ref: "#/components/schemas/AddOrRemoveUserFromConversationRequest"
       responses:
         200:
-          description: Added user to channel
+          description: Added user to conversation
           content:
             application/json:
               schema:
@@ -164,13 +164,13 @@ paths:
   rename:
     put:
       tags:
-        - "Chat: Channels"
-      summary: Rename a channel
+        - "Chat: Conversations"
+      summary: Rename a conversation
       description: |
         **REQUIRED PERMISSIONS:** TBD
         **RATE LIMIT:** TBD
       requestBody:
-        description: The body should contain a channel ID and the new name for that channel
+        description: The body should contain a conversation ID and the new name for that conversation
         required: true
         content:
           application/json:
@@ -179,68 +179,68 @@ paths:
 
 components:
   schemas:
-    CreateChannelRequest:
+    CreateConversationRequest:
       type: object
       properties:
         name:
           type: string
-          description: The name of the new channel
+          description: The name of the new conversation
           example: Substitute Skaters
         type:
           type: string
-          description: 'The channel type - must be either "channel" (for a conversation that can be joined by other users) or "dm" (for a private conversation that users can only access by invitation)'
+          description: 'The conversation type - must be either "channel" (for a conversation that can be joined by other users) or "dm" (for a private conversation that users can only access by invitation)'
           example: channel
         image_string:
           type: string
-          description: (optional) string svg image to will represent the channel
+          description: (optional) string svg image to will represent the conversation
           example: <text x="10" y="10">Hello World!</text>
         description:
           type: string
-          description: (optional) description of the channel
-          example: Use this channel to arrange for substitute skaters.
+          description: (optional) description of the conversation
+          example: Use this conversation to arrange for substitute skaters.
         participants:
           type: integer[]
-          description: User IDs of channel participants
+          description: User IDs of conversation participants
           example: [1, 2, 3]
 
-    DeleteChannelRequest:
+    DeleteConversationRequest:
       type: object
       properties:
-        channel_id:
+        conversation_id:
           type: integer
-          description: The ID of the target channel
+          description: The ID of the target conversation
           example: 1
 
-    UpdateChannelImageRequest:
+    UpdateConversationImageRequest:
       type: object
       properties:
-        channel_id:
+        conversation_id:
           type: integer
-          description: The ID of the target channel
+          description: The ID of the target conversation
           example: 1
         value:
           type: string
-          description: An image string to represent the channel
+          description: An image string to represent the conversation
           example: <text x="10" y="10">Hello Skaters!</text>
 
-    UpdateChannelDescriptionRequest:
+    UpdateConversationDescriptionRequest:
       type: object
       properties:
-        channel_id:
+        conversation_id:
           type: integer
-          description: The ID of the target channel
+          description: The ID of the target conversation
           example: 1
         value:
           type: string
-          description: A description of the channel
-          example: This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
+          description: A description of the conversation
+          example: This conversation is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
 
-    AddOrRemoveUserFromChannelRequest:
+    AddOrRemoveUserFromConversationRequest:
       type: object
       properties:
-        channel_id:
+        conversation_id:
           type: integer
-          description: The ID of the target channel
+          description: The ID of the target conversation
           example: 1
         user_id:
           type: integer
@@ -257,7 +257,7 @@ components:
         request_id:
           $ref: "../common/schemas.yml#/schemas/RequestId"
 
-    ChannelListResponse:
+    ConversationListResponse:
       type: object
       properties:
         status_code:
@@ -268,12 +268,12 @@ components:
           $ref: "../common/schemas.yml#/schemas/RequestId"
         response_data:
           type: list
-          description: A list of available chat channels
+          description: A list of available chat conversations
           example: [
             {
               "name": "Substitute Skaters",
               "type": "channel",
-              "description": "This channel is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!",
+              "description": "This conversation is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!",
               "image_string": "<text x=\"10\" y=\"10\">Hello World!</text>",
               "participants": [
                 1,
@@ -286,11 +286,11 @@ components:
     RenameRequest:
       type: object
       properties:
-        channel_id:
+        conversation_id:
           type: integer
-          description: The ID of the target channel
+          description: The ID of the target conversation
           example: 1
         name:
           type: string
-          description: The new name for the target channel
+          description: The new name for the target conversation
           example: "Work Team 2"

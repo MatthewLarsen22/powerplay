@@ -12,22 +12,22 @@ paths:
     $ref: "./auth/auth.yml#/paths/auth"
   /message:
     $ref: "./chat/message.yml#/paths/message"
-  /chat/channels:
-    $ref: "./chat/channels.yml#/paths/listChannels"
-  /chat/channels/create:
-    $ref: "./chat/channels.yml#/paths/createChannel"
-  /chat/channels/delete:
-    $ref: "./chat/channels.yml#/paths/deleteChannel"
-  /chat/channels/adduser:
-    $ref: "./chat/channels.yml#/paths/addUser"
-  /chat/channels/removeuser:
-    $ref: "./chat/channels.yml#/paths/removeUser"
-  /chat/channels/updateimage:
-    $ref: "./chat/channels.yml#/paths/updateChannelImage"
-  /chat/channels/updatedescription:
-    $ref: "./chat/channels.yml#/paths/updateChannelDescription"
-  /chat/channels/rename:
-    $ref: "./chat/channels.yml#/paths/rename"
+  /chat/conversations:
+    $ref: "./chat/conversations.yml#/paths/listConversations"
+  /chat/conversations/create:
+    $ref: "./chat/conversations.yml#/paths/createConversation"
+  /chat/conversations/delete:
+    $ref: "./chat/conversations.yml#/paths/deleteConversation"
+  /chat/conversations/adduser:
+    $ref: "./chat/conversations.yml#/paths/addUser"
+  /chat/conversations/removeuser:
+    $ref: "./chat/conversations.yml#/paths/removeUser"
+  /chat/conversations/updateimage:
+    $ref: "./chat/conversations.yml#/paths/updateConversationImage"
+  /chat/conversations/updatedescription:
+    $ref: "./chat/conversations.yml#/paths/updateConversationDescription"
+  /chat/conversations/rename:
+    $ref: "./chat/conversations.yml#/paths/rename"
   /shotsongoal:
     $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"   
   /penaltyTypes:
