@@ -13,6 +13,11 @@ func (s session) CreateConversation(conversation *models.Conversation) (*models.
 	return resultOrError(conversation, result)
 }
 
+func (s session) DeleteConversation(conversationID uint) error {
+	result := s.connection.Delete(&models.Conversation{}, conversationID)
+	return result.Error
+}
+
 func (s session) UpdateConversationName(conversationID uint, newName string) error {
 	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("description", newName)
 	return resultObj.Error

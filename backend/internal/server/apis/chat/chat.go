@@ -119,6 +119,14 @@ func deleteConversation(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
+	session := db.GetSession(c)
+	err := session.DeleteConversation(conversationID.Value)
+
+	if err != nil {
+		log.Info("Conversation could not be deleted. Database update failed.")
+		return responder.BadRequest(c)
+	}
+
 	delete(conversations, conversationID.Value) // TODO: delete the conversation from the DB
 	log.Info("Deleted conversation")
 	return responder.Ok(c)
