@@ -12,3 +12,18 @@ func (s session) CreateConversation(conversation *models.Conversation) (*models.
 	result := s.connection.Create(conversation)
 	return resultOrError(conversation, result)
 }
+
+func (s session) UpdateConversationName(conversationID uint, newName string) error {
+	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("description", newName)
+	return resultObj.Error
+}
+
+func (s session) UpdateConversationDescription(conversationID uint, newDescription string) error {
+	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("description", newDescription)
+	return resultObj.Error
+}
+
+func (s session) UpdateConversationImage(conversationID uint, newImageString string) error {
+	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("image_string", newImageString)
+	return resultObj.Error
+}

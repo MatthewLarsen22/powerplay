@@ -153,6 +153,14 @@ func updateImage(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
+	session := db.GetSession(c)
+	err := session.UpdateConversationImage(updateData.ConversationID, updateData.Value)
+
+	if err != nil {
+		log.Info("Conversation image could not be updated. Database update failed.")
+		return responder.BadRequest(c)
+	}
+
 	conversation.ImageString = updateData.Value // TODO: update the participants list in the database
 	conversations[updateData.ConversationID] = conversation
 	log.Info("Conversation image updated")
@@ -188,6 +196,14 @@ func updateDescription(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
+	session := db.GetSession(c)
+	err := session.UpdateConversationDescription(updateData.ConversationID, updateData.Value)
+
+	if err != nil {
+		log.Info("Conversation description could not be updated. Database update failed.")
+		return responder.BadRequest(c)
+	}
+
 	conversation.Description = updateData.Value // TODO: update the participants list in the database
 	conversations[updateData.ConversationID] = conversation
 	log.Info("Conversation description updated")
@@ -220,6 +236,14 @@ func rename(c *fiber.Ctx) error {
 	}
 	if errorMsg != "" {
 		log.Info("Conversation description could not be updated. Reason(s):\n" + errorMsg)
+		return responder.BadRequest(c)
+	}
+
+	session := db.GetSession(c)
+	err := session.UpdateConversationName(updateData.ConversationID, updateData.Value)
+
+	if err != nil {
+		log.Info("Conversation name could not be updated. Database update failed.")
 		return responder.BadRequest(c)
 	}
 
