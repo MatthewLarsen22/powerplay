@@ -290,7 +290,7 @@ components:
           type: integer
           description: The ID of the target conversation
           example: 1
-        name:
+        value:
           type: string
           description: The new name for the target conversation
           example: "Work Team 2"
