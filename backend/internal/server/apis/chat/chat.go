@@ -10,9 +10,6 @@ import (
 	"github.com/jak103/powerplay/internal/utils/responder"
 )
 
-var nextID uint = 1
-var conversations = make(map[uint]models.Conversation)
-
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
 	apis.RegisterHandler(fiber.MethodGet, "/chat/conversations", auth.Public, listConversations)
@@ -73,7 +70,6 @@ func createConversation(c *fiber.Ctx) error {
 	}
 
 	// Create a conversation using the provided data
-
 	conversation := new(models.Conversation)
 	conversation.Name = conversationConfig.Name
 	conversation.Type = conversationConfig.Type
@@ -82,10 +78,6 @@ func createConversation(c *fiber.Ctx) error {
 	// conversation.Participants = conversationConfig.Participants
 	session := db.GetSession(c)
 	record, err := session.CreateConversation(conversation)
-
-	conversations[nextID] = *conversation // TODO: store conversations in the DB instead of just in a dictionary.
-	log.Info("Conversation created: " + conversation.Name)
-	nextID += 1
 
 	if err != nil {
 		log.WithErr(err).Alert("Failed to parse conversation request payload")
@@ -96,6 +88,8 @@ func createConversation(c *fiber.Ctx) error {
 	if record == nil {
 		return responder.BadRequest(c, "Could not post conversation into database")
 	}
+
+	log.Info("Conversation created: " + conversation.Name)
 
 	return responder.Ok(c)
 }
@@ -108,11 +102,10 @@ func deleteConversation(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	// Verify the existence of the conversation. If the conversation doesn't exist, the request is bad.
+	// Verify that a conversation ID was provided. If there is no conversation ID, the request is bad.
 	var errorMsg string
-	_, conversationExists := conversations[conversationID.Value] // TODO: retrieve the conversation from the DB
-	if !conversationExists {
-		errorMsg += "\tConversation does not exist.\n"
+	if conversationID.Value == 0 {
+		errorMsg += "\t'conversation_id' is a required field.\n"
 	}
 	if errorMsg != "" {
 		log.Info("The conversation could not be deleted. Reason(s):\n" + errorMsg)
@@ -127,8 +120,8 @@ func deleteConversation(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	delete(conversations, conversationID.Value) // TODO: delete the conversation from the DB
 	log.Info("Deleted conversation")
+
 	return responder.Ok(c)
 }
 
@@ -142,16 +135,8 @@ func updateImage(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
-	var conversation models.Conversation
-	var conversationOk bool
 	if updateData.ConversationID == 0 {
 		errorMsg += "\t'conversation_id' is a required field.\n"
-	} else {
-		// Retrieve the conversation specified in the conversation_id field.
-		conversation, conversationOk = conversations[updateData.ConversationID] // TODO: retrieve the conversation from the DB.
-		if !conversationOk {
-			errorMsg += "\tSpecified conversation does not exist.\n"
-		}
 	}
 	if updateData.Value == "" {
 		errorMsg += "\t'value' is a required field.\n"
@@ -169,9 +154,8 @@ func updateImage(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	conversation.ImageString = updateData.Value // TODO: update the participants list in the database
-	conversations[updateData.ConversationID] = conversation
 	log.Info("Conversation image updated")
+
 	return responder.Ok(c)
 }
 
@@ -185,16 +169,8 @@ func updateDescription(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
-	var conversation models.Conversation
-	var conversationOk bool
 	if updateData.ConversationID == 0 {
 		errorMsg += "\t'conversation_id' is a required field.\n"
-	} else {
-		// Retrieve the conversation specified in the conversation_id field.
-		conversation, conversationOk = conversations[updateData.ConversationID] // TODO: retrieve the conversation from the DB.
-		if !conversationOk {
-			errorMsg += "\tThe specified conversation does not exist.\n"
-		}
 	}
 	if updateData.Value == "" {
 		errorMsg += "\t'value' is a required field.\n"
@@ -212,9 +188,8 @@ func updateDescription(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	conversation.Description = updateData.Value // TODO: update the participants list in the database
-	conversations[updateData.ConversationID] = conversation
 	log.Info("Conversation description updated")
+
 	return responder.Ok(c)
 }
 
@@ -228,16 +203,8 @@ func rename(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
-	var conversation models.Conversation
-	var conversationOk bool
 	if updateData.ConversationID == 0 {
 		errorMsg += "\t'conversation_id' is a required field.\n"
-	} else {
-		// Retrieve the conversation specified in the conversation_id field.
-		conversation, conversationOk = conversations[updateData.ConversationID] // TODO: retrieve the conversation from the DB.
-		if !conversationOk {
-			errorMsg += "\tThe specified conversation does not exist.\n"
-		}
 	}
 	if updateData.Value == "" {
 		errorMsg += "\t'value' is a required field.\n"
@@ -255,9 +222,8 @@ func rename(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	conversation.Name = updateData.Value
-	conversations[updateData.ConversationID] = conversation
 	log.Info("Conversation name updated")
+
 	return responder.Ok(c)
 }
 
@@ -271,16 +237,8 @@ func addUser(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
-	var conversation models.Conversation
-	var conversationOk bool
 	if updateData.ConversationID == 0 {
 		errorMsg += "\t'conversation_id' is a required field.\n"
-	} else {
-		// Retrieve the conversation specified in the conversation_id field.
-		conversation, conversationOk = conversations[updateData.ConversationID] // TODO: retrieve the conversation from the DB.
-		if !conversationOk {
-			errorMsg += "\tThe specified conversation does not exist.\n"
-		}
 	}
 	if updateData.UserID == 0 {
 		errorMsg += "\t'user_id' is a required field.\n"
@@ -299,8 +257,8 @@ func addUser(c *fiber.Ctx) error {
 	user.ID = updateData.UserID
 
 	// conversation.Participants = append(conversation.Participants, user) // TODO: update the participants list in the database
-	conversations[updateData.ConversationID] = conversation
 	log.Info("User added to conversation")
+
 	return responder.Ok(c)
 }
 
@@ -314,33 +272,23 @@ func removeUser(c *fiber.Ctx) error {
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
-	var conversation models.Conversation
-	var conversationOk bool
-	var userIndex = -1
+	// var userIndex = -1
 	if updateData.ConversationID == 0 {
 		errorMsg += "\t'conversation_id' is a required field.\n"
-	} else {
-		// Retrieve the conversation specified in the conversation_id field.
-		conversation, conversationOk = conversations[updateData.ConversationID] // TODO: retrieve the conversation from the DB.
-		if !conversationOk {
-			errorMsg += "\tThe specified conversation does not exist.\n"
-		}
 	}
 	if updateData.UserID == 0 {
 		errorMsg += "\t'value' is a required field.\n"
 	} else {
-		if conversationOk {
-			// for i, v := range conversation.Participants {
-			// 	if v.ID == updateData.UserID {
-			// 		userIndex = i
-			// 		break
-			// 	}
-			// }
+		// for i, v := range conversation.Participants {
+		// 	if v.ID == updateData.UserID {
+		// 		userIndex = i
+		// 		break
+		// 	}
+		// }
 
-			if userIndex < 0 {
-				errorMsg += "\tThe specified user is not a participant in the specified conversation.\n"
-			}
-		}
+		// if userIndex < 0 {
+		// 	errorMsg += "\tThe specified user is not a participant in the specified conversation.\n"
+		// }
 	}
 	if errorMsg != "" {
 		log.Info("The user could not be removed from the conversation. Reason(s):\n" + errorMsg)
@@ -353,8 +301,8 @@ func removeUser(c *fiber.Ctx) error {
 	// } else {
 	// 	conversation.Participants = make([]models.User, 0)
 	// }
-	conversations[updateData.ConversationID] = conversation
 	log.Info("User removed from conversation.")
+
 	return responder.Ok(c)
 }
 
