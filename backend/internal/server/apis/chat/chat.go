@@ -8,10 +8,19 @@ import (
 	"github.com/jak103/powerplay/internal/server/services/auth"
 	"github.com/jak103/powerplay/internal/utils/log"
 	"github.com/jak103/powerplay/internal/utils/responder"
+	"time"
 )
 
 var nextID = 0
 var channels = make(map[string]ChannelConfiguration)
+var messages = make(map[string]Message)
+
+type Message struct {
+	MessageID string `json:"messageID"`
+	UserID string `json:"userID"`
+	Content string `json:"content"`
+	Timestamp time.Time `json:"timestamp"`
+}
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
@@ -20,6 +29,7 @@ func init() {
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/updateimage", auth.Public, updateImage)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
+	apis.RegisterHandler(fiber.MethodPut, "/chat/message/modifyMessage", auth.Public, modifyMessage)
 }
 
 func helloWorld(c *fiber.Ctx) error {
@@ -218,4 +228,54 @@ type ChannelConfiguration struct {
 	MemberIDs   []string `json:"member_ids"`
 	ImageString string   `json:"image_string"`
 	Description string   `json:"description"`
+}
+
+
+func modifyMessage(c *fiber.Ctx) error {
+	log.Info("hello")
+	messageID := c.Params("messageID")
+	data := new(ModifyMessageRequest)
+
+	if err := c.BodyParser(data); err != nil {
+		return responder.BadRequest(c)
+	}
+	var errorMsg string
+	
+	message, ok := messages[messageID]
+	if !ok {
+		errorMsg += "message does not exist \n"
+	}
+
+	if message.UserID != data.UserID {
+		errorMsg += "Unauthorized to edit this message"
+	}
+
+	if errorMsg != "" {
+		log.Info(errorMsg)
+		return responder.BadRequest(c)
+	}
+
+	message.Content = data.NewContent
+	message.Timestamp = time.Now()
+
+	messages[messageID] = message
+	responseMessage := "Message modified successfully"
+
+	return responder.Ok(c, responseMessage)
+}
+
+type ModifyMessageRequest struct {
+	UserID string `json:"userID"`
+	NewContent string `json:"newContent"`
+}
+
+type ModifyMessageResponse struct {
+	Message string `json:"message"`
+	StatusCode int `json:"status_code"`
+	StatusString string `json:"status_string"`
+	// RequestID string `json:"request_id"`
+	ResponseData struct {
+		MessageID string `json:"messageID"`
+		Content string `json:"content"`
+	} `json:"response_data"`
 }
