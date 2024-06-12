@@ -177,6 +177,30 @@ paths:
             schema:
               $ref: "#/components/schemas/RenameRequest"
 
+  conversationHistory:
+    get:
+      tags:
+        - "Chat: Conversations"
+      summary: Get message history of conversations
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/schemas/ConversationHistoryRequest'
+      responses:
+        200:
+          description: Returned conversation history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationHistoryResponse"
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+
 components:
   schemas:
     CreateConversationRequest:
@@ -294,3 +318,39 @@ components:
           type: string
           description: The new name for the target conversation
           example: "Work Team 2"
+
+    ConversationHistoryResponse:
+      type: object
+      properties:
+        status_code:
+          $ref: "../common/schemas.yml#/schemas/StatusCode200"
+        status_string:
+          $ref: "../common/schemas.yml#/schemas/StatusString200"
+        request_id:
+          $ref: "../common/schemas.yml#/schemas/RequestId"
+        response_data:
+          type: list
+          description: A list of previous messages of the conversation
+          example: [
+            {
+              "senderID": 1,
+              "createdAt": "some time",
+              "messageIDs": [
+                1,
+                2,
+                3
+              ]
+            }
+          ]
+
+    ConversationHistoryRequest:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+          description: Conversation ID
+          example: 1
+        previousMessageTime:
+          type: string
+          description: Get messages before requested time
+          example: 'some time'

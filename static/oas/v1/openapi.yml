@@ -28,6 +28,8 @@ paths:
     $ref: "./chat/conversations.yml#/paths/updateConversationDescription"
   /chat/conversations/rename:
     $ref: "./chat/conversations.yml#/paths/rename"
+  /chat/conversations/history:
+    $ref: "./chat/conversations.yml#/paths/conversationHistory"
   /shotsongoal:
     $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"
   /penaltyTypes:
