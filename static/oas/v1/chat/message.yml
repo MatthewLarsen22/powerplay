@@ -1,28 +1,5 @@
 paths:
-  message:
-    get:
-      summary: Get single message
-      description: |
-        **REQUIRED PERMISSIONS:** TBD 
-        **RATE LIMIT:** TBD
-      tags:
-        - 'Chat: Message'
-      operation-id: get-message
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/schemas/GetMessageRequest'
-      responses:
-        200:
-          description: Message retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/schemas/GetMessageResponse'
-        400:
-          $ref: "../common/errors.yml#/responses/BadRequest"
+  createMessage:
     post:
       summary: Creates a single message
       description: |
@@ -45,39 +22,64 @@ paths:
               schema:
                 $ref: '#/schemas/CreateMessageResponse' 
         400:
-          $ref: "../common/errors.yml#/responses/BadRequest"
-  modifyMessage:
-    put:
-      tags:
-        - 'Chat: Message'
-      summary: Modify a message
+          $ref: "./common/errors.yml#/responses/BadRequest"
+  getMessages:
+    get:
+      summary: Get single message
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
+      tags:
+        - 'Chat: Message'
+      operation-id: get-message
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/schemas/ModifyMessageRequest"
+              $ref: '#/schemas/GetMessageRequest'
       responses:
         200:
-          description: Message content changed
+          description: Message retrieved successfully
           content:
             application/json:
               schema:
-                $ref: "#/schemas/ModifyMessageResponse"
+                $ref: '#/schemas/GetMessageResponse'
         400:
-          $ref: "../common/errors.yml#/responses/BadRequest"
+          $ref: "./common/errors.yml#/responses/BadRequest"
+
+  modifyMessage:
+    put:
+      summary: Edit the contents of a message
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      tags:
+       - 'Chat: Message'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/ModifyMessageRequest'
+      responses:
+        200:
+          description: Message content modified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/ModifyMessageResponse'
+        400:
+          $ref: '../common/errors.yml#/responses/BadRequest'
 
 schemas:
   GetMessageRequest:
     type: object
     properties:
       messageID:
-        type: integer
+        type: string
         description: Message ID of requested message
-        example: 0
+        example: "0"
   GetMessageResponse:
     type: object
     properties:
@@ -122,21 +124,17 @@ schemas:
     type: object
     properties:
       senderID:
-        type: integer
+        type: string
         description: User ID of sender
-        example: 0
+        example: "0"
       content:
         type: string
         description: Message content
         example: 'Comms check, testing'
-      channelID:
-        type: integer
-        description: Channel ID where message was posted
-        example: 0
-      recipientIDs:
-        description: User IDs of message recipients
-        type: array
-        example: [1, 2, 3]
+      recipientID:
+        description: User ID of message recipient
+        type: string
+        example: "1"
   CreateMessageResponse:
     type: object
     properties:
@@ -156,23 +154,22 @@ schemas:
           messageID:
             type: integer
             example: 0
-            
+  
   ModifyMessageRequest:
     type: object
     properties:
       userID: 
         type: string
-        description: User ID of message
+        description: User ID of sender
         example: "0"
-      MessageID:
+      messageID:
         type: string
         description: Message ID
         example: "0"
-      NewMessageContent:
+      newMessageContent:
         type: string
-        description: Replacement message content
-        example: "Hello World!"     
-
+        description: replacement message
+        example: "Hello World!"
   ModifyMessageResponse:
     type: object
     properties:
@@ -182,7 +179,6 @@ schemas:
         $ref: "../common/schemas.yml#/schemas/StatusString200"
       message:
         type: string
-        example: Message modified successfully 
+        example: "Message modified successfully"
       request_id:
         $ref: "../common/schemas.yml#/schemas/RequestId"
-  
