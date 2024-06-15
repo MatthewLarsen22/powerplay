@@ -2,7 +2,8 @@ package models
 
 type Tag struct {
 	DbModel
-	TagName string `json:"tag_name"`
+	TagName     string `json:"tag_name"`
+	Description string `json:"description"`
 }
 
 type UserTag struct {

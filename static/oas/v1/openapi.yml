@@ -24,6 +24,8 @@ paths:
     $ref: "./chat/channels.yml#/paths/updateChannelImage"
   /chat/channels/rename:
     $ref: "./chat/channels.yml#/paths/rename"
+  /chat/tags/create:
+    $ref: "./chat/tags.yml#/paths/create"
   /shotsongoal:
     $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"
   /penaltyTypes:

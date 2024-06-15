@@ -11,7 +11,9 @@ import (
 )
 
 var nextID = 0
+var nextTagID = 0
 var channels = make(map[string]ChannelConfiguration)
+var tags = make(map[string]TagConfiguration)
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
@@ -20,6 +22,7 @@ func init() {
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/updateimage", auth.Public, updateImage)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
+	apis.RegisterHandler(fiber.MethodPost, "/chat/tags/create", auth.Public, createTag)
 }
 
 func helloWorld(c *fiber.Ctx) error {
@@ -204,6 +207,34 @@ func removeUser(c *fiber.Ctx) error {
 	return responder.Ok(c)
 }
 
+func createTag(c *fiber.Ctx) error {
+	tag := new(TagConfiguration)
+
+	// Load the request body as a ChannelConfiguration object. If any of the provided values are the wrong type, the request is bad.
+	if err := c.BodyParser(tag); err != nil {
+		return responder.BadRequest(c)
+	}
+
+	// Verify that values were provided for required fields. If any required values are missing, the request is bad.
+	var errorMsg string
+	if tag.Name == "" {
+		errorMsg += "\t'name' is a required field.\n"
+	}
+	if tag.Description == "" {
+		errorMsg += "\t'description' is a required field.\n"
+	}
+	if errorMsg != "" {
+		log.Info("Tag creation failed. Reason(s):\n" + errorMsg)
+		return responder.BadRequest(c)
+	}
+
+	// Create a tag using the provided data
+	tags[strconv.Itoa(nextID)] = *tag // TODO: store tags in the DB instead of just in a dictionary.
+	nextTagID += 1
+	log.Info("Tag created: " + tag.Name)
+	return responder.Ok(c)
+}
+
 type ChannelID struct {
 	Value string `json:"channel_id"`
 }
@@ -218,4 +249,13 @@ type ChannelConfiguration struct {
 	MemberIDs   []string `json:"member_ids"`
 	ImageString string   `json:"image_string"`
 	Description string   `json:"description"`
+}
+
+type TagID struct {
+	Value string `json:"tag_id"`
+}
+
+type TagConfiguration struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }

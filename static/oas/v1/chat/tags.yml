@@ -1,0 +1,52 @@
+paths:
+  create:
+    post:
+      tags:
+        - "Chat: Tags"
+      summary: Create a new tag
+      description: |
+        **REQUIRED PERMISSIONS:** TBD 
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The request body must contain a name for the new tag and a description of what the tag is used for
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+      responses:
+        200:
+          description: Created tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptySuccessResponse"
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+
+components:
+  schemas:
+    CreateTagRequest:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: The name of the new tag
+          example: Team Captains
+        description:
+          type: string
+          description: Description of the tag
+          example: This tag groups team captains together
+
+    EmptySuccessResponse:
+      type: object
+      properties:
+        status_code:
+          $ref: "../common/schemas.yml#/schemas/StatusCode200"
+        status_string:
+          $ref: "../common/schemas.yml#/schemas/StatusString200"
+        request_id:
+          $ref: "../common/schemas.yml#/schemas/RequestId"
