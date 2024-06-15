@@ -2,8 +2,10 @@ package chat
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jak103/powerplay/internal/models"
 	"github.com/jak103/powerplay/internal/server/apis"
 	"github.com/jak103/powerplay/internal/server/services/auth"
 	"github.com/jak103/powerplay/internal/utils/log"
@@ -12,6 +14,7 @@ import (
 
 var nextID = 0
 var channels = make(map[string]ChannelConfiguration)
+var messages []models.ChatMessage
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
@@ -20,6 +23,9 @@ func init() {
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/updateimage", auth.Public, updateImage)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
+	apis.RegisterHandler(fiber.MethodPut, "/chat/message/modify", auth.Public, modifyMessage)
+	apis.RegisterHandler(fiber.MethodPost, "/chat/message/create", auth.Public, createMessage)
+	apis.RegisterHandler(fiber.MethodGet, "/chat/message/get", auth.Public, getMessage)
 }
 
 func helloWorld(c *fiber.Ctx) error {
@@ -218,4 +224,72 @@ type ChannelConfiguration struct {
 	MemberIDs   []string `json:"member_ids"`
 	ImageString string   `json:"image_string"`
 	Description string   `json:"description"`
+}
+
+func createMessage(c *fiber.Ctx) error {
+	var message models.ChatMessage
+
+
+	if err := c.BodyParser(&message); err != nil {
+		log.Info("Error parsing body: %v", err)
+		return responder.BadRequest(c)
+	}
+	message.MessageID = strconv.Itoa(nextID)
+	nextID++
+	message.CreatedAt = time.Now()
+	messages = append(messages, message)
+	return responder.Ok(c, message.Content)
+}
+
+func getMessage(c *fiber.Ctx) error {
+	var request MessageHistoryRequest
+
+	if err := c.BodyParser(&request); err != nil {
+		return responder.BadRequest(c)
+	}
+
+	var userMessages []models.ChatMessage
+	for _, msg := range messages {
+		if msg.SenderID == request.UserID {
+			userMessages = append(userMessages, msg)
+		}
+	}
+
+	response := MessageHistoryResponse{
+		Messages: userMessages,
+	}
+	return responder.Ok(c, response)
+}
+
+func modifyMessage(c *fiber.Ctx) error {
+	var input struct {
+		UserID string `json:"userID"`
+		MessageID string `json:"messageID"`
+		NewMessageContent string `json:"newMessageContent"`
+	}
+	if err := c.BodyParser(&input); err != nil{
+		return responder.BadRequest(c, "body parser failed")
+	}
+
+	for i, msg := range messages {
+		if msg.MessageID == input.MessageID{
+			if msg.SenderID != input.UserID{
+				return responder.Unauthorized(c, "unauthorized to modify this message")
+			}
+			var oldContent = messages[i].Content
+			messages[i].Content = input.NewMessageContent
+			messages[i].LastModifiedAt = time.Now()
+			return responder.Ok(c, "'" + oldContent + "' replaced with '" + input.NewMessageContent + "'")
+			
+		}
+	}
+	return responder.BadRequest(c, "message doesn't exist")
+}
+
+type MessageHistoryRequest struct {
+	UserID string `json:"userID"`
+}
+
+type MessageHistoryResponse struct {
+	Messages []models.ChatMessage `json:"messages"`
 }
