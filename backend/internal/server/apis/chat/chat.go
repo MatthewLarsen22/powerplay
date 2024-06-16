@@ -25,7 +25,6 @@ func init() {
 	apis.RegisterHandler(fiber.MethodPut, "/chat/channels/removeuser", auth.Public, removeUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/message/modify", auth.Public, modifyMessage)
 	apis.RegisterHandler(fiber.MethodPost, "/chat/message/create", auth.Public, createMessage)
-	apis.RegisterHandler(fiber.MethodGet, "/chat/message/get", auth.Public, getMessage)
 }
 
 func helloWorld(c *fiber.Ctx) error {
@@ -241,26 +240,6 @@ func createMessage(c *fiber.Ctx) error {
 	return responder.Ok(c, message.Content)
 }
 
-func getMessage(c *fiber.Ctx) error {
-	var request MessageHistoryRequest
-
-	if err := c.BodyParser(&request); err != nil {
-		return responder.BadRequest(c)
-	}
-
-	var userMessages []models.ChatMessage
-	for _, msg := range messages {
-		if msg.SenderID == request.UserID {
-			userMessages = append(userMessages, msg)
-		}
-	}
-
-	response := MessageHistoryResponse{
-		Messages: userMessages,
-	}
-	return responder.Ok(c, response)
-}
-
 func modifyMessage(c *fiber.Ctx) error {
 	var input struct {
 		UserID string `json:"userID"`
@@ -268,7 +247,7 @@ func modifyMessage(c *fiber.Ctx) error {
 		NewMessageContent string `json:"newMessageContent"`
 	}
 	if err := c.BodyParser(&input); err != nil{
-		return responder.BadRequest(c, "body parser failed")
+		return responder.BadRequest(c)
 	}
 
 	for i, msg := range messages {
