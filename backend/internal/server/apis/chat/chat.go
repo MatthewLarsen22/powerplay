@@ -1,6 +1,9 @@
 package chat
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/jak103/powerplay/internal/db"
 	"github.com/jak103/powerplay/internal/models"
@@ -75,18 +78,16 @@ func createConversation(c *fiber.Ctx) error {
 	conversation.Type = conversationConfig.Type
 	conversation.Description = conversationConfig.Description
 	conversation.ImageString = conversationConfig.ImageString
-	// conversation.Participants = conversationConfig.Participants
+	conversation.Participants = strings.Trim(strings.Join(strings.Fields(fmt.Sprint(conversationConfig.Participants)), ", "), "[]")
+
+	// Save the new conversation to the database
 	session := db.GetSession(c)
 	record, err := session.CreateConversation(conversation)
 
-	if err != nil {
-		log.WithErr(err).Alert("Failed to parse conversation request payload")
-		log.Info("Participants: %T", conversation.Participants)
+	// If there was a problem saving the validated conversation to the database, report a server error
+	if err != nil || record == nil {
+		log.WithErr(err).Alert("There was a problem saving the new conversation to the database")
 		return responder.InternalServerError(c)
-	}
-
-	if record == nil {
-		return responder.BadRequest(c, "Could not post conversation into database")
 	}
 
 	log.Info("Conversation created: " + conversation.Name)
@@ -112,12 +113,14 @@ func deleteConversation(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
+	// Delete the conversation from the database.
 	session := db.GetSession(c)
 	err := session.DeleteConversation(conversationID.Value)
 
+	// If there was a problem deleting the conversation from the database, report a server error
 	if err != nil {
-		log.Info("Conversation could not be deleted. Database update failed.")
-		return responder.BadRequest(c)
+		log.Info("There was a problem removing the conversation from the database.")
+		return responder.InternalServerError(c)
 	}
 
 	log.Info("Deleted conversation")
@@ -146,12 +149,14 @@ func updateImage(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
+	// Update the record in the database
 	session := db.GetSession(c)
 	err := session.UpdateConversationImage(updateData.ConversationID, updateData.Value)
 
+	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		log.Info("Conversation image could not be updated. Database update failed.")
-		return responder.BadRequest(c)
+		log.Info("There was a problem updating the conversation image in the database.")
+		return responder.InternalServerError(c)
 	}
 
 	log.Info("Conversation image updated")
@@ -180,12 +185,14 @@ func updateDescription(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
+	// Update the record in the database
 	session := db.GetSession(c)
 	err := session.UpdateConversationDescription(updateData.ConversationID, updateData.Value)
 
+	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		log.Info("Conversation description could not be updated. Database update failed.")
-		return responder.BadRequest(c)
+		log.Info("There was a problem updating the description in the database.")
+		return responder.InternalServerError(c)
 	}
 
 	log.Info("Conversation description updated")
@@ -214,12 +221,14 @@ func rename(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
+	// Update the record in the database
 	session := db.GetSession(c)
 	err := session.UpdateConversationName(updateData.ConversationID, updateData.Value)
 
+	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		log.Info("Conversation name could not be updated. Database update failed.")
-		return responder.BadRequest(c)
+		log.Info("There was a problem updating the name in the database.")
+		return responder.InternalServerError(c)
 	}
 
 	log.Info("Conversation name updated")
@@ -243,20 +252,21 @@ func addUser(c *fiber.Ctx) error {
 	if updateData.UserID == 0 {
 		errorMsg += "\t'user_id' is a required field.\n"
 	}
-	// TODO: verify that the provided value is a valid user ID
-	// TODO: verify that the user ID has not already been added to the conversation
 	if errorMsg != "" {
 		log.Info("The user could not be added to the conversation. Reason(s):\n" + errorMsg)
 		return responder.BadRequest(c)
 	}
 
-	// TODO: retrieve the user corresponding to the ID user from the database
-	user := models.User{
-		FirstName: "anonymous",
-	}
-	user.ID = updateData.UserID
+	// Update the Conversation record in the database with a new participants list
+	session := db.GetSession(c)
+	err := session.AddConversationParticipant(updateData.ConversationID, updateData.UserID)
 
-	// conversation.Participants = append(conversation.Participants, user) // TODO: update the participants list in the database
+	// If there was a problem updating the participants list in the database, report a server error
+	if err != nil {
+		log.Info("There was a problem updating the participants list in the database.")
+		return responder.InternalServerError(c)
+	}
+
 	log.Info("User added to conversation")
 
 	return responder.Ok(c)
@@ -278,29 +288,20 @@ func removeUser(c *fiber.Ctx) error {
 	}
 	if updateData.UserID == 0 {
 		errorMsg += "\t'value' is a required field.\n"
-	} else {
-		// for i, v := range conversation.Participants {
-		// 	if v.ID == updateData.UserID {
-		// 		userIndex = i
-		// 		break
-		// 	}
-		// }
-
-		// if userIndex < 0 {
-		// 	errorMsg += "\tThe specified user is not a participant in the specified conversation.\n"
-		// }
 	}
 	if errorMsg != "" {
 		log.Info("The user could not be removed from the conversation. Reason(s):\n" + errorMsg)
 		return responder.BadRequest(c)
 	}
 
-	// TODO: update the participants list in the database
-	// if len(conversation.Participants) > 1 {
-	// 	conversation.Participants = append(conversation.Participants[:userIndex], conversation.Participants[userIndex+1:]...)
-	// } else {
-	// 	conversation.Participants = make([]models.User, 0)
-	// }
+	session := db.GetSession(c)
+	err := session.RemoveConversationParticipant(updateData.ConversationID, updateData.UserID)
+
+	if err != nil {
+		log.Info("There was a problem updating the participants list in the database.")
+		return responder.InternalServerError(c)
+	}
+
 	log.Info("User removed from conversation.")
 
 	return responder.Ok(c)

@@ -15,5 +15,5 @@ type Conversation struct {
 	Type         ConversationType `json:"type"`
 	Description  string           `json:"description"`
 	ImageString  string           `json:"image_string"`
-	Participants []uint           `json:"participants" gorm:"type:bigint[]"`
+	Participants string           `json:"participants"`
 }
