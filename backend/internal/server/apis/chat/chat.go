@@ -14,7 +14,6 @@ import (
 )
 
 func init() {
-	apis.RegisterHandler(fiber.MethodGet, "/hello", auth.Public, helloWorld)
 	apis.RegisterHandler(fiber.MethodGet, "/chat/conversations", auth.Public, listConversations)
 	apis.RegisterHandler(fiber.MethodPost, "/chat/conversations/create", auth.Public, createConversation)
 	apis.RegisterHandler(fiber.MethodDelete, "/chat/conversations/delete", auth.Public, deleteConversation)
@@ -23,10 +22,6 @@ func init() {
 	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/rename", auth.Public, rename)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/removeuser", auth.Public, removeUser)
-}
-
-func helloWorld(c *fiber.Ctx) error {
-	return c.SendString("Hello World")
 }
 
 func listConversations(c *fiber.Ctx) error {
