@@ -29,7 +29,7 @@ paths:
   /chat/conversations/rename:
     $ref: "./chat/conversations.yml#/paths/rename"
   /shotsongoal:
-    $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"   
+    $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"
   /penaltyTypes:
     $ref: "./stats/penalties.yml#/paths/penaltyTypes"
   /leagues:
@@ -43,6 +43,8 @@ paths:
   #$ref: "./[Relative path starting from v1]#/paths/[yml path]"
   /goals:
     $ref: "./stats/goal.yml#/paths/goals"
+  /seasons:
+    $ref: "./season/season.yml#/paths/seasons"
 
 components:
   securitySchemes:

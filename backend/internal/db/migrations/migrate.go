@@ -57,6 +57,7 @@ func init() {
 				return tx.AutoMigrate(&models.ShotOnGoal{})
 			},
 			Rollback: func(tx *gorm.DB) error {
+				// TODO: Should this be named something else?
 				return tx.Migrator().DropTable("goals")
 			},
 		},
@@ -117,6 +118,7 @@ func Run(db *gorm.DB) error {
 			&models.Goal{},
 			&models.PenaltyType{},
 			&models.Penalty{},
+			&models.Season{},
 		)
 		if err != nil {
 			return err
