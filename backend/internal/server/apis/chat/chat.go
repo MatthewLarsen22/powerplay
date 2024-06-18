@@ -37,34 +37,42 @@ func listConversations(c *fiber.Ctx) error {
 }
 
 func createConversation(c *fiber.Ctx) error {
-	log.Info("Creating a conversation")
 	conversationConfig := new(ConversationConfiguration)
 
 	// Load the request body as a ConversationConfiguration object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(conversationConfig); err != nil {
-		log.Info("Encountered an error while parsing the body of the request")
-		log.Info(err.Error())
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, "Failed to parse the request. Please ensure that all inputs are of the correct data types, as specified in the API documentation.")
 	}
 
 	// Verify that values were provided for required fields. If any required values are missing, the request is bad.
 	var errorMsg string
 	if conversationConfig.Name == "" {
-		errorMsg += "\t'name' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'name'"
 	}
 	if conversationConfig.Type == "" {
-		errorMsg += "\t'type' is  required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'type'"
 	} else {
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
 		if conversationConfig.Type != models.CHANNEL && conversationConfig.Type != models.DM {
-			errorMsg += "\t'type' must be \"channel\" or \"dm\"."
+			errorMsg += "invalid input for 'type'"
 		}
 	}
 	if conversationConfig.Participants == nil {
-		errorMsg += "\t'participants' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'participants'"
 	}
 	if errorMsg != "" {
-		log.Info("Conversation creation failed. Reason(s):\n" + errorMsg)
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, fmt.Sprintf("Failed to create the conversation. Please address the following issues with the request: %v.", errorMsg))
 	}
 
 	// Create a conversation using the provided data
@@ -81,11 +89,8 @@ func createConversation(c *fiber.Ctx) error {
 
 	// If there was a problem saving the validated conversation to the database, report a server error
 	if err != nil || record == nil {
-		log.WithErr(err).Alert("There was a problem saving the new conversation to the database")
-		return responder.InternalServerError(c)
+		return responder.InternalServerError(c, "There was a problem saving the new conversation to the database.")
 	}
-
-	log.Info("Conversation created: " + conversation.Name)
 
 	return responder.Ok(c)
 }
@@ -95,17 +100,19 @@ func deleteConversation(c *fiber.Ctx) error {
 
 	// Load the request body as a conversationID string. If the provided value is the wrong type, the request is bad.
 	if err := c.BodyParser(conversationID); err != nil {
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, "Failed to parse the request. Please ensure that all inputs are of the correct data types, as specified in the API documentation.")
 	}
 
 	// Verify that a conversation ID was provided. If there is no conversation ID, the request is bad.
 	var errorMsg string
 	if conversationID.Value == 0 {
-		errorMsg += "\t'conversation_id' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'conversation_id'"
 	}
 	if errorMsg != "" {
-		log.Info("The conversation could not be deleted. Reason(s):\n" + errorMsg)
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, fmt.Sprintf("Failed to delete the conversation. Please address the following issues with the request: %v.", errorMsg))
 	}
 
 	// Delete the conversation from the database.
@@ -114,11 +121,8 @@ func deleteConversation(c *fiber.Ctx) error {
 
 	// If there was a problem deleting the conversation from the database, report a server error
 	if err != nil {
-		log.Info("There was a problem removing the conversation from the database.")
-		return responder.InternalServerError(c)
+		return responder.InternalServerError(c, "There was a problem removing the conversation from the database.")
 	}
-
-	log.Info("Deleted conversation")
 
 	return responder.Ok(c)
 }
@@ -128,20 +132,22 @@ func updateImage(c *fiber.Ctx) error {
 
 	// Load the request body as a ConversationUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, "Failed to parse the request. Please ensure that all inputs are of the correct data types, as specified in the API documentation.")
 	}
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
 	if updateData.ConversationID == 0 {
-		errorMsg += "\t'conversation_id' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'conversation_id'"
 	}
 	if updateData.Value == "" {
-		errorMsg += "\t'value' is a required field.\n"
+		errorMsg += "missing required field 'value' is a required field.\n"
 	}
 	if errorMsg != "" {
-		log.Info("Conversation image could not be updated. Reason(s):\n" + errorMsg)
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, fmt.Sprintf("Failed to update conversation image. Please address the following issues with the request: %v.", errorMsg))
 	}
 
 	// Update the record in the database
@@ -150,11 +156,8 @@ func updateImage(c *fiber.Ctx) error {
 
 	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		log.Info("There was a problem updating the conversation image in the database.")
-		return responder.InternalServerError(c)
+		return responder.InternalServerError(c, "There was a problem updating the conversation image in the database.")
 	}
-
-	log.Info("Conversation image updated")
 
 	return responder.Ok(c)
 }
@@ -164,20 +167,25 @@ func updateDescription(c *fiber.Ctx) error {
 
 	// Load the request body as a ConversationUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, "Failed to parse the request. Please ensure that all inputs are of the correct data types, as specified in the API documentation.")
 	}
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
 	if updateData.ConversationID == 0 {
-		errorMsg += "\t'conversation_id' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'conversation_id'"
 	}
 	if updateData.Value == "" {
-		errorMsg += "\t'value' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field'value'"
 	}
 	if errorMsg != "" {
-		log.Info("Conversation description could not be updated. Reason(s):\n" + errorMsg)
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, fmt.Sprintf("Failed to update the conversation description. Please address the following issues with the request: %v.", errorMsg))
 	}
 
 	// Update the record in the database
@@ -186,11 +194,8 @@ func updateDescription(c *fiber.Ctx) error {
 
 	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		log.Info("There was a problem updating the description in the database.")
-		return responder.InternalServerError(c)
+		return responder.InternalServerError(c, "There was a problem updating the description in the database.")
 	}
-
-	log.Info("Conversation description updated")
 
 	return responder.Ok(c)
 }
@@ -200,20 +205,25 @@ func rename(c *fiber.Ctx) error {
 
 	// Load the request body as a ConversationUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, "Failed to parse the request. Please ensure that all inputs are of the correct data types, as specified in the API documentation.")
 	}
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
 	if updateData.ConversationID == 0 {
-		errorMsg += "\t'conversation_id' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'conversation_id'"
 	}
 	if updateData.Value == "" {
-		errorMsg += "\t'value' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'value'"
 	}
 	if errorMsg != "" {
-		log.Info("Conversation description could not be updated. Reason(s):\n" + errorMsg)
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, fmt.Sprintf("Failed to rename conversation. Please address the following issues with the request: %v.", errorMsg))
 	}
 
 	// Update the record in the database
@@ -222,11 +232,8 @@ func rename(c *fiber.Ctx) error {
 
 	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		log.Info("There was a problem updating the name in the database.")
-		return responder.InternalServerError(c)
+		return responder.InternalServerError(c, "There was a problem updating the name in the database.")
 	}
-
-	log.Info("Conversation name updated")
 
 	return responder.Ok(c)
 }
@@ -236,20 +243,25 @@ func addUser(c *fiber.Ctx) error {
 
 	// Load the request body as a ConversationUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, "Failed to parse the request. Please ensure that all inputs are of the correct data types, as specified in the API documentation.")
 	}
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
 	if updateData.ConversationID == 0 {
-		errorMsg += "\t'conversation_id' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'conversation_id'"
 	}
 	if updateData.UserID == 0 {
-		errorMsg += "\t'user_id' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'user_id'"
 	}
 	if errorMsg != "" {
-		log.Info("The user could not be added to the conversation. Reason(s):\n" + errorMsg)
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, fmt.Sprintf("Failed to add the user to the conversation. Please address the following issues with the request: %v.", errorMsg))
 	}
 
 	// Update the Conversation record in the database with a new participants list
@@ -258,11 +270,8 @@ func addUser(c *fiber.Ctx) error {
 
 	// If there was a problem updating the participants list in the database, report a server error
 	if err != nil {
-		log.Info("There was a problem updating the participants list in the database.")
-		return responder.InternalServerError(c)
+		return responder.InternalServerError(c, "There was a problem updating the participants list in the database.")
 	}
-
-	log.Info("User added to conversation")
 
 	return responder.Ok(c)
 }
@@ -272,32 +281,33 @@ func removeUser(c *fiber.Ctx) error {
 
 	// Load the request body as a ConversationUpdate object. If any of the provided values are the wrong type, the request is bad.
 	if err := c.BodyParser(updateData); err != nil {
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, "Failed to parse the request. Please ensure that all inputs are of the correct data types, as specified in the API documentation.")
 	}
 
 	// Verify that values were provided for required fields and verify the existence of the conversation. If any required values are missing or the conversation doesn't exist, the request is bad.
 	var errorMsg string
 	// var userIndex = -1
 	if updateData.ConversationID == 0 {
-		errorMsg += "\t'conversation_id' is a required field.\n"
+		if errorMsg != "" {
+			errorMsg += "; "
+		}
+		errorMsg += "missing required field 'conversation_id'"
 	}
 	if updateData.UserID == 0 {
-		errorMsg += "\t'value' is a required field.\n"
+		errorMsg += "missing required field 'value'"
 	}
 	if errorMsg != "" {
-		log.Info("The user could not be removed from the conversation. Reason(s):\n" + errorMsg)
-		return responder.BadRequest(c)
+		return responder.BadRequest(c, fmt.Sprintf("Failed to remove the user from the conversation. Please address the following issues with the request: %v.", errorMsg))
 	}
 
+	// Update the Conversation record in the database with a new participants list
 	session := db.GetSession(c)
 	err := session.RemoveConversationParticipant(updateData.ConversationID, updateData.UserID)
 
+	// If there was a problem updating the participants list in the database, report a server error
 	if err != nil {
-		log.Info("There was a problem updating the participants list in the database.")
-		return responder.InternalServerError(c)
+		return responder.InternalServerError(c, "There was a problem updating the participants list in the database.")
 	}
-
-	log.Info("User removed from conversation.")
 
 	return responder.Ok(c)
 }
