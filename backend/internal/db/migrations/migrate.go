@@ -62,8 +62,6 @@ func init() {
 			},
 		},
 
-<<<<<<< HEAD
-=======
 		&gormigrate.Migration{
 			ID: "create_conversations_table",
 			Migrate: func(tx *gorm.DB) error {
@@ -73,7 +71,6 @@ func init() {
 				return tx.Migrator().DropTable("conversations")
 			},
 		},
->>>>>>> channels
 		// Add more migrations here
 	)
 }
