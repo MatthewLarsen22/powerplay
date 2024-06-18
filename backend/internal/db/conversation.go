@@ -30,7 +30,7 @@ func (s session) DeleteConversation(conversationID uint) error {
 }
 
 func (s session) UpdateConversationName(conversationID uint, newName string) error {
-	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("description", newName)
+	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("name", newName)
 	return resultObj.Error
 }
 
