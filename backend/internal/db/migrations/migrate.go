@@ -62,6 +62,18 @@ func init() {
 			},
 		},
 
+<<<<<<< HEAD
+=======
+		&gormigrate.Migration{
+			ID: "create_conversations_table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&models.Conversation{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable("conversations")
+			},
+		},
+>>>>>>> channels
 		// Add more migrations here
 	)
 }
