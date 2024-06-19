@@ -115,14 +115,11 @@ func Run(db *gorm.DB) error {
 			&models.Game{},
 			&models.Registration{},
 			&models.KeyRecord{},
-<<<<<<< HEAD
 			&models.Goal{},
 			&models.PenaltyType{},
 			&models.Penalty{},
 			&models.Season{},
-=======
 			&models.Message{},
->>>>>>> 340bde5914891f60f7da5af6a245efee37ce2c0c
 		)
 		if err != nil {
 			return err
