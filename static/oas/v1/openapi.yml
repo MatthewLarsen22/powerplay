@@ -13,21 +13,21 @@ paths:
   /message:
     $ref: "./chat/message.yml#/paths/message"
   /chat/conversations:
-    $ref: "./chat/conversations.yml#/paths/listConversations"
+    $ref: "./chat/conversations.yml#/paths/listAllConversations"
   /chat/conversations/create:
     $ref: "./chat/conversations.yml#/paths/createConversation"
   /chat/conversations/delete:
     $ref: "./chat/conversations.yml#/paths/deleteConversation"
   /chat/conversations/adduser:
-    $ref: "./chat/conversations.yml#/paths/addUser"
+    $ref: "./chat/conversations.yml#/paths/addConversationParticipant"
   /chat/conversations/removeuser:
-    $ref: "./chat/conversations.yml#/paths/removeUser"
+    $ref: "./chat/conversations.yml#/paths/removeConversationParticipant"
+  /chat/conversations/updatename:
+    $ref: "./chat/conversations.yml#/paths/updateConversationName"
   /chat/conversations/updateimage:
     $ref: "./chat/conversations.yml#/paths/updateConversationImage"
   /chat/conversations/updatedescription:
     $ref: "./chat/conversations.yml#/paths/updateConversationDescription"
-  /chat/conversations/rename:
-    $ref: "./chat/conversations.yml#/paths/rename"
   /shotsongoal:
     $ref: "./stats/shotsongoal.yml#/paths/shotsOnGoal"
   /penaltyTypes:

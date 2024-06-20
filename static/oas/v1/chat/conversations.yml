@@ -1,9 +1,9 @@
 paths:
-  listConversations:
+  listAllConversations:
     get:
       tags:
         - "Chat: Conversations"
-      summary: List all available chat conversations
+      summary: List all available conversations
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
@@ -21,7 +21,7 @@ paths:
     post:
       tags:
         - "Chat: Conversations"
-      summary: Create a new chat conversation 
+      summary: Create a new conversation 
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
@@ -41,11 +41,12 @@ paths:
                 $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
+
   deleteConversation:
     delete:
       tags:
         - "Chat: Conversations"
-      summary: Delete a chat conversation 
+      summary: Delete a conversation 
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
@@ -65,11 +66,37 @@ paths:
                 $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
+
+  updateConversationName:
+    put:
+      tags:
+        - "Chat: Conversations"
+      summary: Update the name of a conversation
+      description: |
+        **REQUIRED PERMISSIONS:** TBD
+        **RATE LIMIT:** TBD
+      requestBody:
+        description: The body should contain a conversation ID and the new name for that conversation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationNameRequest"
+      responses:
+        200:
+          description: Updated name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptySuccessResponse"
+        400:
+          $ref: "../common/errors.yml#/responses/BadRequest"
+
   updateConversationImage:
     put:
       tags:
         - "Chat: Conversations"
-      summary: Update the image for a chat conversation
+      summary: Update the image for a conversation
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
@@ -89,11 +116,12 @@ paths:
                 $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
+
   updateConversationDescription:
     put:
       tags:
         - "Chat: Conversations"
-      summary: Update the description for a chat conversation
+      summary: Update the description for a conversation
       description: |
         **REQUIRED PERMISSIONS:** TBD 
         **RATE LIMIT:** TBD
@@ -113,7 +141,8 @@ paths:
                 $ref: "#/components/schemas/EmptySuccessResponse"
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
-  addUser:
+
+  addConversationParticipant:
     put:
       tags:
         - "Chat: Conversations"
@@ -127,7 +156,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddOrRemoveUserFromConversationRequest"
+              $ref: "#/components/schemas/AddOrRemoveConversationParticipantRequest"
       responses:
         200:
           description: Added user to conversation
@@ -137,7 +166,8 @@ paths:
                 $ref: '#/components/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
-  removeUser:
+
+  removeConversationParticipant:
     put:
       tags:
         - "Chat: Conversations"
@@ -151,7 +181,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddOrRemoveUserFromConversationRequest"
+              $ref: "#/components/schemas/AddOrRemoveConversationParticipantRequest"
       responses:
         200:
           description: Added user to conversation
@@ -161,21 +191,6 @@ paths:
                 $ref: '#/components/schemas/EmptySuccessResponse'
         400:
           $ref: "../common/errors.yml#/responses/BadRequest"
-  rename:
-    put:
-      tags:
-        - "Chat: Conversations"
-      summary: Rename a conversation
-      description: |
-        **REQUIRED PERMISSIONS:** TBD
-        **RATE LIMIT:** TBD
-      requestBody:
-        description: The body should contain a conversation ID and the new name for that conversation
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RenameRequest"
 
 components:
   schemas:
@@ -185,7 +200,7 @@ components:
         name:
           type: string
           description: The name of the new conversation
-          example: Substitute Skaters
+          example: Subs
         type:
           type: string
           description: 'The conversation type - must be either "channel" (for a conversation that can be joined by other users) or "dm" (for a private conversation that users can only access by invitation)'
@@ -211,6 +226,18 @@ components:
           description: The ID of the target conversation
           example: 1
 
+    UpdateConversationNameRequest:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+          description: The ID of the target conversation
+          example: 1
+        value:
+          type: string
+          description: The new name for the target conversation
+          example: "Substitute Skaters"
+
     UpdateConversationImageRequest:
       type: object
       properties:
@@ -235,7 +262,7 @@ components:
           description: A description of the conversation
           example: This conversation is a space for team captains to coordinate with substitute players. If you need an extra skater in your upcoming game, ask here!
 
-    AddOrRemoveUserFromConversationRequest:
+    AddOrRemoveConversationParticipantRequest:
       type: object
       properties:
         conversation_id:
@@ -268,7 +295,7 @@ components:
           $ref: "../common/schemas.yml#/schemas/RequestId"
         response_data:
           type: list
-          description: A list of available chat conversations
+          description: A list of all existing chat conversations
           example: [
             {
               "name": "Substitute Skaters",
@@ -282,15 +309,3 @@ components:
               ]
             }
           ]
-
-    RenameRequest:
-      type: object
-      properties:
-        conversation_id:
-          type: integer
-          description: The ID of the target conversation
-          example: 1
-        value:
-          type: string
-          description: The new name for the target conversation
-          example: "Work Team 2"

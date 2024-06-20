@@ -17,9 +17,9 @@ func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/chat/conversations", auth.Public, listConversations)
 	apis.RegisterHandler(fiber.MethodPost, "/chat/conversations/create", auth.Public, createConversation)
 	apis.RegisterHandler(fiber.MethodDelete, "/chat/conversations/delete", auth.Public, deleteConversation)
+	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/updateName", auth.Public, updateName)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/updateimage", auth.Public, updateImage)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/updatedescription", auth.Public, updateDescription)
-	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/rename", auth.Public, rename)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/adduser", auth.Public, addUser)
 	apis.RegisterHandler(fiber.MethodPut, "/chat/conversations/removeuser", auth.Public, removeUser)
 }
@@ -200,7 +200,7 @@ func updateDescription(c *fiber.Ctx) error {
 	return responder.Ok(c)
 }
 
-func rename(c *fiber.Ctx) error {
+func updateName(c *fiber.Ctx) error {
 	updateData := new(ConversationPropertyChange)
 
 	// Load the request body as a ConversationUpdate object. If any of the provided values are the wrong type, the request is bad.
@@ -223,7 +223,7 @@ func rename(c *fiber.Ctx) error {
 		errorMsg += "missing required field 'value'"
 	}
 	if errorMsg != "" {
-		return responder.BadRequest(c, fmt.Sprintf("Failed to rename conversation. Please address the following issues with the request: %v.", errorMsg))
+		return responder.BadRequest(c, fmt.Sprintf("Failed to update conversation name. Please address the following issues with the request: %v.", errorMsg))
 	}
 
 	// Update the record in the database
