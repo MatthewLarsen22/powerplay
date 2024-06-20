@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"strings"
+	"strconv"
 
 	"github.com/jak103/powerplay/internal/models"
 )
@@ -20,8 +21,26 @@ func (s session) GetConversation(conversationID uint) (*models.Conversation, err
 }
 
 func (s session) CreateConversation(conversation *models.Conversation) (*models.Conversation, error) {
-	result := s.connection.Create(conversation)
-	return resultOrError(conversation, result)
+	splitParticipants := strings.Split(conversation.Participants, ", ")
+	var missingUsers string
+	for _, participantID := range splitParticipants {
+		u, err := strconv.ParseUint(participantID, 10, 64)
+		if err != nil {
+			missingUsers += fmt.Sprintf(" %v ", participantID)
+		} else {
+			userResult := s.connection.First(&models.User{}, u)
+			if userResult.Error != nil {
+				missingUsers += fmt.Sprintf(" %v ", participantID)
+			}
+		}
+	}
+
+	if missingUsers != "" {
+		return nil, fmt.Errorf("user(s) not found: %v", missingUsers)
+	} else {
+		result := s.connection.Create(conversation)
+		return resultOrError(conversation, result)
+	}
 }
 
 func (s session) DeleteConversation(conversationID uint) error {
@@ -99,13 +118,11 @@ func (s session) AddConversationParticipant(conversationID uint, userID uint) er
 		var user *models.User
 		userResult := s.connection.First(user, userID)
 
-		if userResult.Error != nil {
+		if userResult.Error != nil && fmt.Sprintf("%v", userResult.Error) == "record not found" {
+			resultObj.Error = fmt.Errorf("could not find a record for user %v", userID)
+		}else {
 			resultObj.Error = userResult.Error
-		} else {
-			if user == nil {
-				resultObj.Error = fmt.Errorf("could not find a record for user %v", userID)
-			}
-		}
+		} 
 	}
 
 	if resultObj.Error == nil {
