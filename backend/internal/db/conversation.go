@@ -25,28 +25,45 @@ func (s session) CreateConversation(conversation *models.Conversation) (*models.
 }
 
 func (s session) DeleteConversation(conversationID uint) error {
-	result := s.connection.Delete(&models.Conversation{}, conversationID)
-	return result.Error
+	resultObj := s.connection.Delete(&models.Conversation{}, conversationID)
+	if resultObj.Error == nil && resultObj.RowsAffected < 1 {
+		resultObj.Error = fmt.Errorf("could not find a record for conversation %v", conversationID)
+	}
+	return resultObj.Error
 }
 
 func (s session) UpdateConversationName(conversationID uint, newName string) error {
 	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("name", newName)
+	if resultObj.Error == nil && resultObj.RowsAffected < 1 {
+		resultObj.Error = fmt.Errorf("could not find a record for conversation %v", conversationID)
+	}
 	return resultObj.Error
 }
 
 func (s session) UpdateConversationDescription(conversationID uint, newDescription string) error {
 	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("description", newDescription)
+	if resultObj.Error == nil && resultObj.RowsAffected < 1 {
+		resultObj.Error = fmt.Errorf("could not find a record for conversation %v", conversationID)
+	}
 	return resultObj.Error
 }
 
 func (s session) UpdateConversationImage(conversationID uint, newImageString string) error {
 	resultObj := s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("image_string", newImageString)
+	if resultObj.Error == nil && resultObj.RowsAffected < 1 {
+		resultObj.Error = fmt.Errorf("could not find a record for conversation %v", conversationID)
+	}
 	return resultObj.Error
 }
 
 func (s session) RemoveConversationParticipant(conversationID uint, userID uint) error {
 	var conversation *models.Conversation
 	resultObj := s.connection.Select("participants").First(&conversation).Where("id = ?", conversationID)
+
+	if resultObj.Error == nil && conversation == nil {
+		resultObj.Error = fmt.Errorf("could not find a record for conversation %v", conversationID)
+	}
+
 	if resultObj.Error == nil {
 		splitUsers := strings.Split(conversation.Participants, ", ")
 
@@ -58,7 +75,9 @@ func (s session) RemoveConversationParticipant(conversationID uint, userID uint)
 			}
 		}
 
-		if participantIndex >= 0 {
+		if participantIndex < 0 {
+			resultObj.Error = fmt.Errorf("user %v is not a participant in conversation %v", userID, conversationID)
+		} else {
 			splitUsers = append(splitUsers[:participantIndex], splitUsers[participantIndex+1:]...)
 			conversation.Participants = strings.Trim(strings.Join(strings.Fields(fmt.Sprint(splitUsers)), ", "), "[]")
 			resultObj = s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("participants", conversation.Participants)
@@ -71,6 +90,24 @@ func (s session) RemoveConversationParticipant(conversationID uint, userID uint)
 func (s session) AddConversationParticipant(conversationID uint, userID uint) error {
 	var conversation *models.Conversation
 	resultObj := s.connection.Select("participants").First(&conversation).Where("id = ?", conversationID)
+
+	if resultObj.Error == nil && conversation == nil {
+		resultObj.Error = fmt.Errorf("could not find a record for conversation %v", conversationID)
+	}
+
+	if resultObj.Error == nil {
+		var user *models.User
+		userResult := s.connection.First(user, userID)
+
+		if userResult.Error != nil {
+			resultObj.Error = userResult.Error
+		} else {
+			if user == nil {
+				resultObj.Error = fmt.Errorf("could not find a record for user %v", userID)
+			}
+		}
+	}
+
 	if resultObj.Error == nil {
 		splitUsers := strings.Split(conversation.Participants, ", ")
 
@@ -86,6 +123,8 @@ func (s session) AddConversationParticipant(conversationID uint, userID uint) er
 			splitUsers = append(splitUsers, fmt.Sprintf("%v", userID))
 			conversation.Participants = strings.Trim(strings.Join(strings.Fields(fmt.Sprint(splitUsers)), ", "), "[]")
 			resultObj = s.connection.Model(&models.Conversation{}).Where("id = ?", conversationID).Update("participants", conversation.Participants)
+		} else {
+			resultObj.Error = fmt.Errorf("user %v is already a participant in conversation %v", userID, conversationID)
 		}
 	}
 

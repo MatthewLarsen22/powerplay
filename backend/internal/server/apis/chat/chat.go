@@ -89,7 +89,7 @@ func createConversation(c *fiber.Ctx) error {
 
 	// If there was a problem saving the validated conversation to the database, report a server error
 	if err != nil || record == nil {
-		return responder.InternalServerError(c, "There was a problem saving the new conversation to the database.")
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem saving the new conversation to the database: %v.", err))
 	}
 
 	return responder.Ok(c)
@@ -121,7 +121,7 @@ func deleteConversation(c *fiber.Ctx) error {
 
 	// If there was a problem deleting the conversation from the database, report a server error
 	if err != nil {
-		return responder.InternalServerError(c, "There was a problem removing the conversation from the database.")
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem removing the conversation from the database: %v.", err))
 	}
 
 	return responder.Ok(c)
@@ -156,7 +156,7 @@ func updateImage(c *fiber.Ctx) error {
 
 	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		return responder.InternalServerError(c, "There was a problem updating the conversation image in the database.")
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem updating the conversation image in the database: %v.", err))
 	}
 
 	return responder.Ok(c)
@@ -194,7 +194,7 @@ func updateDescription(c *fiber.Ctx) error {
 
 	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		return responder.InternalServerError(c, "There was a problem updating the description in the database.")
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem updating the description in the database: %v.", err))
 	}
 
 	return responder.Ok(c)
@@ -232,7 +232,7 @@ func rename(c *fiber.Ctx) error {
 
 	// If there was a problem updating the database record, report a server error
 	if err != nil {
-		return responder.InternalServerError(c, "There was a problem updating the name in the database.")
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem updating the name in the database: %v.", err))
 	}
 
 	return responder.Ok(c)
@@ -270,7 +270,7 @@ func addUser(c *fiber.Ctx) error {
 
 	// If there was a problem updating the participants list in the database, report a server error
 	if err != nil {
-		return responder.InternalServerError(c, "There was a problem updating the participants list in the database.")
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem updating the participants list in the database: %v.", err))
 	}
 
 	return responder.Ok(c)
@@ -306,7 +306,7 @@ func removeUser(c *fiber.Ctx) error {
 
 	// If there was a problem updating the participants list in the database, report a server error
 	if err != nil {
-		return responder.InternalServerError(c, "There was a problem updating the participants list in the database.")
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem updating the participants list in the database: %v.", err))
 	}
 
 	return responder.Ok(c)
