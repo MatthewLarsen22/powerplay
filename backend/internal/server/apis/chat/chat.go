@@ -2,6 +2,7 @@ package chat
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -338,7 +339,7 @@ func createTag(c *fiber.Ctx) error {
 	}
 
 	// Create a tag using the provided data
-	tags[strconv.Itoa(nextID)] = *tag // TODO: store tags in the DB instead of just in a dictionary.
+	tags[strconv.Itoa(nextTagID)] = *tag // TODO: store tags in the DB instead of just in a dictionary.
 	nextTagID += 1
 	log.Info("Tag created: " + tag.Name)
 	return responder.Ok(c)
