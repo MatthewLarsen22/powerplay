@@ -62,6 +62,15 @@ func init() {
 			},
 		},
 
+		&gormigrate.Migration{
+			ID: "create_conversations_table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&models.Conversation{})
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.Migrator().DropTable("conversations")
+			},
+		},
 		// Add more migrations here
 	)
 }
@@ -110,6 +119,8 @@ func Run(db *gorm.DB) error {
 			&models.PenaltyType{},
 			&models.Penalty{},
 			&models.Season{},
+			&models.Tag{},
+			&models.UserTag{},
 		)
 		if err != nil {
 			return err
