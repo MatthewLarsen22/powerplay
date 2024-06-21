@@ -2,7 +2,6 @@ package chat
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,9 +12,6 @@ import (
 	"github.com/jak103/powerplay/internal/utils/log"
 	"github.com/jak103/powerplay/internal/utils/responder"
 )
-
-var nextTagID = 0
-var tags = make(map[string]TagConfiguration)
 
 func init() {
 	apis.RegisterHandler(fiber.MethodGet, "/chat/conversations", auth.Public, listConversations)
@@ -318,19 +314,19 @@ func removeUser(c *fiber.Ctx) error {
 }
 
 func createTag(c *fiber.Ctx) error {
-	tag := new(TagConfiguration)
+	tagConfig := new(TagConfiguration)
 
 	// Load the request body as a ChannelConfiguration object. If any of the provided values are the wrong type, the request is bad.
-	if err := c.BodyParser(tag); err != nil {
+	if err := c.BodyParser(tagConfig); err != nil {
 		return responder.BadRequest(c)
 	}
 
 	// Verify that values were provided for required fields. If any required values are missing, the request is bad.
 	var errorMsg string
-	if tag.Name == "" {
+	if tagConfig.Name == "" {
 		errorMsg += "\t'name' is a required field.\n"
 	}
-	if tag.Description == "" {
+	if tagConfig.Description == "" {
 		errorMsg += "\t'description' is a required field.\n"
 	}
 	if errorMsg != "" {
@@ -338,10 +334,21 @@ func createTag(c *fiber.Ctx) error {
 		return responder.BadRequest(c)
 	}
 
-	// Create a tag using the provided data
-	tags[strconv.Itoa(nextTagID)] = *tag // TODO: store tags in the DB instead of just in a dictionary.
-	nextTagID += 1
-	log.Info("Tag created: " + tag.Name)
+	// Create a tag object
+	tag := &models.Tag{
+		TagName:     tagConfig.Name,
+		Description: tagConfig.Description,
+	}
+
+	// Create a tagConfig using the provided data
+	session := db.GetSession(c)
+	result, err := session.CreateTag(tag)
+
+	if err != nil {
+		return responder.InternalServerError(c, fmt.Sprintf("There was a problem creating the tagConfig: %v", err))
+	}
+
+	log.Info("Tag created: " + result.TagName)
 	return responder.Ok(c)
 }
 
